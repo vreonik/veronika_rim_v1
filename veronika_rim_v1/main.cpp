@@ -39,7 +39,13 @@ int gen_paz(int min=1, int max=10){
 vector<Studentas> nuskaityti(const string &failas){
     vector<Studentas> visi_stud;
     std::ifstream fd(failas);
+    if (!fd.is_open()) {
+        cout<<"Nepavyko su failu susitvarkyti"<<endl;
+    }
     string eil;
+    
+    std::getline(fd, eil);
+    
     while(std::getline(fd, eil)){
         if(eil.empty()) continue;
         stringstream ss(eil);
@@ -81,14 +87,12 @@ int main(){
     cin>>pasirink;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (pasirink == 'f' || pasirink == 'F'){
-        visi_stud = nuskaityti("kursiokai.txt");
+        visi_stud = nuskaityti("studentai100000.txt");
     }else{
         char dar = 't';
         
         while(dar == 't' || dar == 'T'){
             Studentas stud;
-            double sum = 0, med = 0;
-            
             cout<<"Įveskite studento vardą: ";
             cin>>stud.vard;
             cout<<"Įveskite studento pavardę: ";
@@ -112,7 +116,6 @@ int main(){
                     int nd;
                     if(ss >> nd){
                         stud.nd.push_back(nd);
-                        sum += nd;
                     } else{
                         cout<<"Blogai, įveskite iš naujo!:("<<endl;
                     }
@@ -129,7 +132,6 @@ int main(){
                 for(int i=0; i<kiek_nd; i++){
                     int nd = gen_paz();
                     stud.nd.push_back(nd);
-                    sum+=nd;
                 }
                 stud.egzas = gen_paz();
                 cout<<"Sugeneruoti paž.: ";
