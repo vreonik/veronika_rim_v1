@@ -6,6 +6,7 @@
 #include <sstream>
 #include <limits>
 #include <random>
+#include <fstream>
 
 using std::cout;
 using std::cin;
@@ -30,6 +31,22 @@ int gen_paz(int min=1, int max=10){
     static std::mt19937 mt(std::random_device{}());
     std::uniform_int_distribution<int> dist(min, max);
     return dist(mt);
+}
+
+vector<Studentas> nuskaityti(const string &failas){
+    vector<Studentas> visi_stud;
+    std::ifstream fd("kursiokai.txt");
+    string eil;
+    while(std::getline(fd, eil)){
+        if(eil.empty()) continue;
+        stringstream ss(eil);
+        Studentas stud;
+        int nd;
+        ss>>stud.vard>>stud.pav;
+        while(ss>>nd) stud.nd.push_back(nd);
+        visi_stud.push_back();
+    }
+    return visi_stud;
 }
 
 int main(){
