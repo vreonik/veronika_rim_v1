@@ -19,6 +19,9 @@ using std::sort;
 using std::stringstream;
 using std::max;
 using std::min;
+using std::setw;
+using std::left;
+using std::right;
 
 struct Studentas{
     string vard;
@@ -35,22 +38,35 @@ int gen_paz(int min=1, int max=10){
 
 vector<Studentas> nuskaityti(const string &failas){
     vector<Studentas> visi_stud;
-    std::ifstream fd("kursiokai.txt");
+    std::ifstream fd(failas);
     string eil;
     while(std::getline(fd, eil)){
         if(eil.empty()) continue;
         stringstream ss(eil);
         Studentas stud;
-        int nd;
+        int paz;
         ss>>stud.vard>>stud.pav;
-        while(ss>>nd) stud.nd.push_back(nd);
-        visi_stud.push_back();
+        while(ss>>paz){
+            stud.nd.push_back(paz);
+        }
+        if(!stud.nd.empty()){
+            stud.egzas = stud.nd.back();
+            stud.nd.pop_back();
+        }
+        visi_stud.push_back(stud);
     }
     return visi_stud;
 }
 
 int main(){
     vector<Studentas> visi_stud;
+    char pasirink;
+    cout<<"Ar norite skaityti iš failo(f) ar įvesti/generuoti randomu patys(p)? ";
+    cin>>pasirink;
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (pasirink == 'f' || pasirink == 'F'){
+        visi_stud = nuskaityti("kursiokai.txt");
+    }
     char dar = 't';
     
     while(dar == 't' || dar == 'T'){
