@@ -58,6 +58,22 @@ vector<Studentas> nuskaityti(const string &failas){
     return visi_stud;
 }
 
+double skaiciuoti_vidurki(const vector<int>& nd){
+    if(nd.empty()) return 0;
+    double sum=0;
+    for(int x: nd) sum += x;
+    return sum/nd.size();
+}
+
+double skaiciuoti_mediana(vector<int> nd){
+    if(nd.empty()) return 0;
+    sort(nd.begin(), nd.end());
+    if(nd.size()%2==0)
+        return (nd[nd.size()/2 -1] + nd[nd.size()/2])/2.0;
+    else
+        return nd[nd.size()/2];
+}
+
 int main(){
     vector<Studentas> visi_stud;
     char pasirink;
@@ -104,54 +120,59 @@ int main(){
                 cout<<"Įveskite egzamino pažymį: ";
                 cin>>stud.egzas;
                 cin.ignore();}
-                else if(pas == 'r' || pas == 'R'){
-                    int kiek_nd;
-                    cout<<"Kiek namų darbų generuoti?";
-                    cin >> kiek_nd;
-                    cin.ignore();
-                    
-                    for(int i=0; i<kiek_nd; i++){
-                        int nd = gen_paz();
-                        stud.nd.push_back(nd);
-                        sum+=nd;
-                    }
-                    stud.egzas = gen_paz();
-                    cout<<"Sugeneruoti paž.: ";
-                    for( auto x: stud.nd) cout<<x<<" ";
-                    cout<<"Gen. egz. paž.: "<<stud.egzas<<endl;
-                } else{
-                       cout<<"Kažkas blogai, grįžtame į meniu."<<endl;
-                       continue;}
+            else if(pas == 'r' || pas == 'R'){
+                int kiek_nd;
+                cout<<"Kiek namų darbų generuoti?";
+                cin >> kiek_nd;
+                cin.ignore();
+                
+                for(int i=0; i<kiek_nd; i++){
+                    int nd = gen_paz();
+                    stud.nd.push_back(nd);
+                    sum+=nd;
+                }
+                stud.egzas = gen_paz();
+                cout<<"Sugeneruoti paž.: ";
+                for( auto x: stud.nd) cout<<x<<" ";
+                cout<<"Gen. egz. paž.: "<<stud.egzas<<endl;
+            } else{
+                cout<<"Kažkas blogai, grįžtame į meniu."<<endl;
+                continue;}
             visi_stud.push_back(stud);
-
+            
             cout<<"Pridėti dar vieną?(t/T - taip, kitaip - ne): ";
-            cin>>dar;
-            cin.ignore();
+            cin>>dar;}
     }
+    char pasirinkimas;
+    cout<<"Pasirinkite galutinio balo skaičiavimo būdą(v-vidurkis, m-mediana, a-abudu): ";
+    cin>>pasirinkimas;
 
-        char pasirinkimas;
-        cout<<"Pasirinkite galutinio balo skaičiavimo būdą(v-vidurkis, m-mediana, a-abudu): ";
-        cin>>pasirinkimas;
-
-        cout<<left<<setw(15)<<"Vardas"<<left<<setw(15)<<"Pavarde";
-        if(pasirinkimas == 'v' || pasirinkimas == 'V'){
-            cout<<left<<setw(20)<<"Galutinis pažymys(Vid.)";
-        }else if(pasirinkimas == 'm' || pasirinkimas == 'M'){
-            cout<<left<<setw(20)<<"Galutinis pažymys(Med.)";
-        }else{
-            cout<<left<<setw(20)<<"Galutinis pažymys(Vid.)"<<left<<setw(20)<<"Galutinis pažymys(Med.)";
-        }
-        cout<<endl;
-        cout<<string(60, '-')<<endl;
+    cout<<left<<setw(15)<<"Vardas"<<left<<setw(15)<<"Pavarde";
+    if(pasirinkimas == 'v' || pasirinkimas == 'V'){
+        cout<<left<<setw(30)<<"Galutinis pažymys(Vid.)";
+    }else if(pasirinkimas == 'm' || pasirinkimas == 'M'){
+        cout<<left<<setw(30)<<"Galutinis pažymys(Med.)";
+    }else{
+        cout<<left<<setw(30)<<"Galutinis pažymys(Vid.)"<<left<<setw(30)<<"Galutinis pažymys(Med.)";
     }
+    cout<<endl;
+    cout<<string(90, '-')<<endl;
     
     cout<<fixed<<setprecision(2);
     for (auto temp : visi_stud) {
-        double vidurkis = skaciuoti_vidurki(stud.nd);//susikurt funckija
-        double mediana = skaiciuoti_mediana(stud.nd);//susikurti funkcija
-        double galutinis_vid = vidurkis*0.4 +stud.egzas*0.6;
-        double galutinis_med = mediana*0.4 +stud.egzas*0.6;
-        cout<<temp.vard<<" "<<temp.pav<<"; N.D. skaičius: "<<temp.nd.size()<<endl;
+        double vidurkis = skaiciuoti_vidurki(temp.nd);
+        double mediana = skaiciuoti_mediana(temp.nd);
+        double galutinis_vid = vidurkis*0.4 +temp.egzas*0.6;
+        double galutinis_med = mediana*0.4 +temp.egzas*0.6;
+        cout<<left<<setw(15)<<temp.vard<<left<<setw(15)<<temp.pav;
+        if(pasirinkimas == 'v' || pasirinkimas == 'V'){
+            cout<<left<<setw(30)<<galutinis_vid;
+        }else if(pasirinkimas == 'm' || pasirinkimas == 'M'){
+            cout<<left<<setw(30)<<galutinis_med;
+        }else{
+            cout<<left<<setw(30)<<galutinis_vid<<left<<setw(30)<<galutinis_med;
+        }
+        cout<<endl;
     }
 
     return 0;
