@@ -87,7 +87,10 @@ int main(){
     cin>>pasirink;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (pasirink == 'f' || pasirink == 'F'){
-        visi_stud = nuskaityti("studentai100000.txt");
+        visi_stud = nuskaityti("kursiokai.txt");
+        sort(visi_stud.begin(), visi_stud.end(), [](const Studentas &a, const Studentas &b){
+            return a.vard < b.vard;
+        });
     }else{
         char dar = 't';
         
@@ -145,6 +148,9 @@ int main(){
             cout<<"Pridėti dar vieną?(t/T - taip, kitaip - ne): ";
             cin>>dar;}
     }
+    sort(visi_stud.begin(), visi_stud.end(), [](const Studentas &a, const Studentas &b){
+        return a.vard < b.vard;
+    });
     char pasirinkimas;
     cout<<"Pasirinkite galutinio balo skaičiavimo būdą(v-vidurkis, m-mediana, a-abudu): ";
     cin>>pasirinkimas;
