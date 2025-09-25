@@ -66,63 +66,67 @@ int main(){
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (pasirink == 'f' || pasirink == 'F'){
         visi_stud = nuskaityti("kursiokai.txt");
-    }
-    char dar = 't';
-    
-    while(dar == 't' || dar == 'T'){
-        Studentas stud;
-        double sum = 0, med = 0;
+    }else{
+        char dar = 't';
         
-        cout<<"Įveskite studento vardą: ";
-        cin>>stud.vard;
-        cout<<"Įveskite studento pavardę: ";
-        cin>>stud.pav;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        
-        char pas;
-        cout<<"Generuosite random (r) ar įvesite (i)? ";
-        cin>>pas;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        
-        if(pas == 'i' || pas == 'I'){
-            cout<<"Įveskite N.d. pažymius po vieną. Pabaigus įvedimą paspauskite du kartus ENTER:"<<endl;
-            while(true){
-                string eil;
-                cout<<"Pažymys: ";
-                getline(cin, eil);
-                if(eil.empty())break;
-                
-                stringstream ss(eil);
-                int nd;
-                if(ss >> nd){
-                    stud.nd.push_back(nd);
-                    sum += nd;
-                } else{
-                    cout<<"Blogai, įveskite iš naujo!:("<<endl;
-                }
-            }
+        while(dar == 't' || dar == 'T'){
+            Studentas stud;
+            double sum = 0, med = 0;
             
-            cout<<"Įveskite egzamino pažymį: ";
-            cin>>stud.egzas;
-            cin.ignore();}else if(pas == 'r' || pas == 'R'){
-                int kiek_nd;
-                cout<<"Kiek namų darbų generuoti?";
-                cin >> kiek_nd;
-                cin.ignore();
-                
-                for(int i=0; i<kiek_nd; i++){
-                    int nd = gen_paz();
-                    stud.nd.push_back(nd);
-                    sum+=nd;
-                }
-                stud.egzas = gen_paz();
-                cout<<"Sugeneruoti paž.: ";
-                for( auto x: stud.nd) cout<<x<<" ";
-                cout<<"Gen. egz. paž.: "<<stud.egzas<<endl;
-            } else{
-                   cout<<"Kažkas blogai, grįžtame į meniu."<<endl;
-                   continue;
-                   }
+            cout<<"Įveskite studento vardą: ";
+            cin>>stud.vard;
+            cout<<"Įveskite studento pavardę: ";
+            cin>>stud.pav;
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            char pas;
+            cout<<"Generuosite random (r) ar įvesite (i)? ";
+            cin>>pas;
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            if(pas == 'i' || pas == 'I'){
+                cout<<"Įveskite N.d. pažymius po vieną. Pabaigus įvedimą paspauskite du kartus ENTER:"<<endl;
+                while(true){
+                    string eil;
+                    cout<<"Pažymys: ";
+                    getline(cin, eil);
+                    if(eil.empty())break;
+                    
+                    stringstream ss(eil);
+                    int nd;
+                    if(ss >> nd){
+                        stud.nd.push_back(nd);
+                        sum += nd;
+                    } else{
+                        cout<<"Blogai, įveskite iš naujo!:("<<endl;
+                    }
+                cout<<"Įveskite egzamino pažymį: ";
+                cin>>stud.egzas;
+                cin.ignore();}else if(pas == 'r' || pas == 'R'){
+                    int kiek_nd;
+                    cout<<"Kiek namų darbų generuoti?";
+                    cin >> kiek_nd;
+                    cin.ignore();
+                    
+                    for(int i=0; i<kiek_nd; i++){
+                        int nd = gen_paz();
+                        stud.nd.push_back(nd);
+                        sum+=nd;
+                    }
+                    stud.egzas = gen_paz();
+                    cout<<"Sugeneruoti paž.: ";
+                    for( auto x: stud.nd) cout<<x<<" ";
+                    cout<<"Gen. egz. paž.: "<<stud.egzas<<endl;
+                } else{
+                       cout<<"Kažkas blogai, grįžtame į meniu."<<endl;
+                       continue;}
+            visi_stud.push_back(stud);
+
+            cout<<"Pridėti dar vieną?(t/T - taip, kitaip - ne): ";
+            cin>>dar;
+            cin.ignore();
+    }
+
         
         if (stud.nd.empty()){
             cout<<"Studentas neturi namų darbų pažymių!"<<endl;
@@ -156,12 +160,6 @@ int main(){
             cout<<stud.vard<<" "<<stud.pav<<"; Galutinis pažymys(Vid.) "<< galutinis_vid<<endl;
             cout<<stud.vard<<" " <<stud.pav<<"; Galutinis pažymys(Med.) "<<galutinis_med<< endl;
         }
-
-        visi_stud.push_back(stud);
-
-        cout<<"Pridėti dar vieną?(t/T - taip, kitaip - ne): ";
-        cin>>dar;
-        cin.ignore();
     }
 
     cout<<"Visų studentų sąrašas:"<<endl;
