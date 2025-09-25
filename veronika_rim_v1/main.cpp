@@ -148,7 +148,9 @@ int main(){
     char pasirinkimas;
     cout<<"Pasirinkite galutinio balo skaičiavimo būdą(v-vidurkis, m-mediana, a-abudu): ";
     cin>>pasirinkimas;
-
+    
+    int limitas = 10;
+    int limito_skaiciuotojas = 0;
     cout<<left<<setw(15)<<"Vardas"<<left<<setw(15)<<"Pavarde";
     if(pasirinkimas == 'v' || pasirinkimas == 'V'){
         cout<<left<<setw(30)<<"Galutinis pažymys(Vid.)";
@@ -162,6 +164,7 @@ int main(){
     
     cout<<fixed<<setprecision(2);
     for (auto temp : visi_stud) {
+        if(limito_skaiciuotojas++ >= limitas)break;
         double vidurkis = skaiciuoti_vidurki(temp.nd);
         double mediana = skaiciuoti_mediana(temp.nd);
         double galutinis_vid = vidurkis*0.4 +temp.egzas*0.6;
@@ -176,6 +179,8 @@ int main(){
         }
         cout<<endl;
     }
+    if(visi_stud.size() > limitas)
+        cout << "... ir dar " << (visi_stud.size() - limitas) << " įrašų";
 
     return 0;
 }
