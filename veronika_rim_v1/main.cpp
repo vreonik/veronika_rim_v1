@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -8,6 +7,7 @@
 #include <limits>
 #include <random>
 #include <fstream>
+#include "studentas.h"
 
 using std::cout;
 using std::cin;
@@ -24,12 +24,7 @@ using std::setw;
 using std::left;
 using std::right;
 
-struct Studentas{
-    string vard;
-    string pav;
-    vector<int> nd;
-    int egzas;
-};
+
 
 int gen_paz(int min=1, int max=10){
     static std::mt19937 mt(std::random_device{}());
@@ -65,22 +60,6 @@ vector<Studentas> nuskaityti(const string &failas){
     return visi_stud;
 }
 
-double skaiciuoti_vidurki(const vector<int>& nd){
-    if(nd.empty()) return 0;
-    double sum=0;
-    for(int x: nd) sum += x;
-    return sum/nd.size();
-}
-
-double skaiciuoti_mediana(vector<int> nd){
-    if(nd.empty()) return 0;
-    sort(nd.begin(), nd.end());
-    if(nd.size()%2==0)
-        return (nd[nd.size()/2 -1] + nd[nd.size()/2])/2.0;
-    else
-        return nd[nd.size()/2];
-}
-
 int main(){
     vector<Studentas> visi_stud;
     char pasirink;
@@ -88,7 +67,7 @@ int main(){
     cin>>pasirink;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (pasirink == 'f' || pasirink == 'F'){
-        visi_stud = nuskaityti("studentai100000.txt");
+        visi_stud = nuskaityti("kursiokai.txt");
         sort(visi_stud.begin(), visi_stud.end(), [](const Studentas &a, const Studentas &b){
             return a.vard < b.vard;
         });
@@ -188,7 +167,5 @@ int main(){
     }
     if(visi_stud.size() > limitas)
         cout << "... ir dar " << (visi_stud.size() - limitas) << " įrašų"<<endl;
-int main(int argc, const char * argv[]) {
-    std::cout << "Hello, World!\n";
-    return 0;
+        return 0;
 }
