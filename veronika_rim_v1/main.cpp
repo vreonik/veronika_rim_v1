@@ -24,14 +24,6 @@ using std::setw;
 using std::left;
 using std::right;
 
-
-
-int gen_paz(int min=1, int max=10){
-    static std::mt19937 mt(std::random_device{}());
-    std::uniform_int_distribution<int> dist(min, max);
-    return dist(mt);
-}
-
 vector<Studentas> nuskaityti(const string &failas){
     vector<Studentas> visi_stud;
     std::ifstream fd(failas);
