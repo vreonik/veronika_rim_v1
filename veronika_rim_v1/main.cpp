@@ -91,11 +91,12 @@ void spausdinti_perziura(const vector<Studentas>& visi_stud, char pasirinkimas, 
 }
 
 void klasifikuoti_ir_irasyti(const vector<Studentas> &visi_stud,
-                              char pasirinkimas,
-                              const string &failas_vargsiukai,
-                              const string &failas_kietakiai,
-                              long long &klasifik_ms,
-                              long long &irasymo_ms) {
+                             char pasirinkimas,
+                             const string &failas_vargsiukai,
+                             const string &failas_kietakiai,
+                             long long &klasifik_ms,
+                             long long &irasymo_ms,
+                             char rikiuoti_kriterijus = 'v') {
     using namespace std::chrono;
     auto pradzia = high_resolution_clock::now();
 
@@ -113,12 +114,18 @@ void klasifikuoti_ir_irasyti(const vector<Studentas> &visi_stud,
             kietakiai.push_back({s, {galut_vid, galut_med}});
     }
 
-    sort(vargsiukai.begin(), vargsiukai.end(), [](auto &a, auto &b){
-        return gauti_vardo_numeri(a.first.vard) < gauti_vardo_numeri(b.first.vard);
-    });
-    sort(kietakiai.begin(), kietakiai.end(), [](auto &a, auto &b){
-        return gauti_vardo_numeri(a.first.vard) < gauti_vardo_numeri(b.first.vard);
-    });
+    auto rikiuoti = [rikiuoti_kriterijus](const pair<Studentas, pair<double,double>> &a,
+                                           const pair<Studentas, pair<double,double>> &b) {
+        if (rikiuoti_kriterijus == 'v' || rikiuoti_kriterijus == 'V')
+            return a.second.first < b.second.first;
+        else if (rikiuoti_kriterijus == 'm' || rikiuoti_kriterijus == 'M')
+            return a.second.second < b.second.second;
+        else
+            return a.first.vard < b.first.vard;
+    };
+
+    sort(vargsiukai.begin(), vargsiukai.end(), rikiuoti);
+    sort(kietakiai.begin(), kietakiai.end(), rikiuoti);
 
     auto vidurys = high_resolution_clock::now();
     klasifik_ms = duration_cast<milliseconds>(vidurys - pradzia).count();
@@ -156,7 +163,7 @@ void klasifikuoti_ir_irasyti(const vector<Studentas> &visi_stud,
 }
 
 
-void apdoroti_faila(const string &fname, char budas) {
+void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     auto rs = Laikmatis::now();
     vector<Studentas> visi = nuskaityti(fname);
     auto re = Laikmatis::now();
@@ -165,7 +172,7 @@ void apdoroti_faila(const string &fname, char budas) {
     string bazinis = be_priesdelio(fname);
     long long c = 0, w = 0;
     klasifikuoti_ir_irasyti(visi, budas, "vargsiukai_" + bazinis + ".txt",
-                             "kietakiai_" + bazinis + ".txt", c, w);
+                             "kietakiai_" + bazinis + ".txt", c, w, rikiavimas);
 
     cout << "Failas: " << fname
          << "Skaitymas=" << read_ms
@@ -184,6 +191,13 @@ int main() {
 
     char rez; cin >> rez;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    cout << "Rikiuoti pagal:\n"
+         << " v - vidurkį\n"
+         << " m - medianą\n"
+         << " p - vardą\n"
+         << " Pasirinkimas: ";
+    char rikiuoti_kriterijus; cin >> rikiuoti_kriterijus;
 
     if (rez == 't' || rez == 'T') {
         testavimo_rezimas = true;
@@ -215,7 +229,7 @@ int main() {
                 long long c = 0, w = 0;
                 klasifikuoti_ir_irasyti(visi, b,
                     "vargsiukai_test_" + std::to_string(N) + ".txt",
-                    "kietakiai_test_" + std::to_string(N) + ".txt", c, w);
+                    "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
                 klas_sum += c; iras_sum += w;
             }
 
@@ -224,8 +238,8 @@ int main() {
                  << "ms, klasifikavimas=" << klas_sum/5
                  << "ms, įrašymas=" << iras_sum/5 << "ms\n";
 
-            rezultatai << N << " | " << gen_sum/5 << " | " << read_sum/5
-                        << " | " << klas_sum/5 << " | " << iras_sum/5 << "\n";
+            rezultatai << N << " " << gen_sum/5 << " " << read_sum/5
+                        << " " << klas_sum/5 << " " << iras_sum/5 << "\n";
         }
 
         rezultatai.close();
@@ -249,7 +263,7 @@ int main() {
         if (d == 't' || d == 'T') {
             cout << "Balo būdas (v/m/a): ";
             char b; cin >> b;
-            apdoroti_faila(fname, b);
+            apdoroti_faila(fname, b, rikiuoti_kriterijus);
         }
         return 0;
     }
@@ -260,7 +274,7 @@ int main() {
         if (fname.empty()) fname = "kursiokai.txt";
         cout << "Balo būdas (v/m/a): ";
         char b; cin >> b;
-        apdoroti_faila(fname, b);
+        apdoroti_faila(fname, b, rikiuoti_kriterijus);
         return 0;
     }
 
@@ -297,11 +311,11 @@ int main() {
         cout << "Balo būdas (v/m/a): ";
         char b; cin >> b;
         long long c = 0, w = 0;
-        klasifikuoti_ir_irasyti(visi, b, "vargsiukai_manual.txt", "kietakiai_manual.txt", c, w);
+        klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis.txt", "kietakiai_rankinis.txt", c, w, rikiuoti_kriterijus);
         cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
         return 0;
     }
 
-    cout << "Nesuprantamas pasirinkimas.\n";
+    cout << " Nesuprantamas pasirinkimas.\n";
     return 0;
 }
