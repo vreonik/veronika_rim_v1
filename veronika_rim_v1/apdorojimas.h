@@ -8,7 +8,6 @@
 #include <fstream>
 #include <chrono>
 #include "studentas.h"
-#include "util.h"
 
 using std::cout;
 using std::cin;
