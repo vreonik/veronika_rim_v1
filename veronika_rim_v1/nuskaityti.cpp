@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <list>
 
 std::vector<Studentas> nuskaityti(const std::string& failas){
     std::ifstream fd(failas);
@@ -35,4 +36,13 @@ std::vector<Studentas> nuskaityti(const std::string& failas){
     }
 
     return visi;
+}
+
+std::list<Studentas> nuskaityti_i_list(const std::string& failas) {
+    auto temp_visi = nuskaityti(failas);
+    std::list<Studentas> result;
+    for (const auto& s : temp_visi) {
+        result.push_back(s);
+    }
+    return result;
 }
