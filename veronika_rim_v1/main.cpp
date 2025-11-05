@@ -93,22 +93,13 @@ void spausdinti_perziura(const Container& visi_stud, char pasirinkimas, int limi
         cout << "... ir dar " << (std::distance(visi_stud.begin(), visi_stud.end()) - limitas) << " įrašų.\n";
 }
 
-template<typename T>
-void rusiuoti_list(T& container, auto rikiuoti) {
-    container.sort(rikiuoti);
-}
-
-template<typename T>
-void rusiuoti_vector(T& container, auto rikiuoti) {
-    sort(container.begin(), container.end(), rikiuoti);
-}
-
 template<typename Container>
 void klasifikuoti_ir_irasyti(const Container &visi_stud,
                              char pasirinkimas,
                              const string &failas_vargsiukai,
                              const string &failas_kietakiai,
-                             long long &klasifik_ms,
+                             long long &skirstymo_ms,
+                             long long &rusiavimo_ms,
                              long long &irasymo_ms,
                              char rikiuoti_kriterijus = 'v') {
     using namespace std::chrono;
@@ -128,6 +119,11 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
             kietakiai.push_back({s, {galut_vid, galut_med}});
     }
 
+    auto skirstymo_pabaiga = high_resolution_clock::now();
+    skirstymo_ms = duration_cast<milliseconds>(skirstymo_pabaiga - pradzia).count();
+
+    auto rusiavimo_pradzia = high_resolution_clock::now();
+
     auto rikiuoti = [rikiuoti_kriterijus](const pair<Studentas, pair<double,double>> &a,
                                            const pair<Studentas, pair<double,double>> &b) {
         if (rikiuoti_kriterijus == 'v' || rikiuoti_kriterijus == 'V')
@@ -141,10 +137,11 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
     sort(vargsiukai.begin(), vargsiukai.end(), rikiuoti);
     sort(kietakiai.begin(), kietakiai.end(), rikiuoti);
 
-    auto vidurys = high_resolution_clock::now();
-    klasifik_ms = duration_cast<milliseconds>(vidurys - pradzia).count();
+    auto rusiavimo_pabaiga = high_resolution_clock::now();
+    rusiavimo_ms = duration_cast<milliseconds>(rusiavimo_pabaiga - rusiavimo_pradzia).count();
 
     auto ras_pradzia = high_resolution_clock::now();
+    
     ofstream fv(failas_vargsiukai);
     ofstream fk(failas_kietakiai);
     fv << fixed << setprecision(2);
@@ -185,6 +182,72 @@ list<Studentas> nuskaityti_i_list(const std::string& failas) {
     return result;
 }
 
+void testuoti_konteinerius() {
+    vector<int> dydziai = {1000, 10000, 100000, 1000000};
+    int nd_kiek = 5;
+    char b = 'v';
+    char rikiuoti_kriterijus = 'v';
+    
+    cout << "Konteinerių palyginimo testas su " << dydziai.size() << " dydžiais:\n";
+    
+    ofstream palyginimo_rezultatai("konteineriu_palyginimas.txt");
+    palyginimo_rezultatai << "Dydis, Konteineris, Skaitymas(ms), Skirstymas(ms), Rūšiavimas(ms), Įrašymas(ms), Viso(ms)\n";
+
+    for (int N : dydziai) {
+        cout << "\n=== Testas su " << N << " įrašų ===\n";
+        
+        string fname = "palyginimo_test_" + std::to_string(N) + ".txt";
+        generuoti_faila(N, fname, nd_kiek);
+        
+        {
+            auto pradzia = Laikmatis::now();
+            vector<Studentas> visi = nuskaityti(fname);
+            auto skaitymo_pabaiga = Laikmatis::now();
+            long long read_ms = std::chrono::duration_cast<ms>(skaitymo_pabaiga - pradzia).count();
+            
+            long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
+            klasifikuoti_ir_irasyti(visi, b,
+                "vargsiukai_palyginimo_" + std::to_string(N) + "_vector.txt",
+                "kietakiai_palyginimo_" + std::to_string(N) + "_vector.txt",
+                skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+                
+            long long viso_ms = read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms;
+            
+            cout << "Vector: " << viso_ms << "ms (skaitymas: " << read_ms
+                 << "ms, skirstymas: " << skirstymo_ms << "ms, rūšiavimas: " << rusiavimo_ms
+                 << "ms, įrašymas: " << irasymo_ms << "ms)\n";
+                 
+            palyginimo_rezultatai << N << ",vector," << read_ms << "," << skirstymo_ms
+                                 << "," << rusiavimo_ms << "," << irasymo_ms << "," << viso_ms << "\n";
+        }
+        
+        {
+            auto pradzia = Laikmatis::now();
+            list<Studentas> visi = nuskaityti_i_list(fname);
+            auto skaitymo_pabaiga = Laikmatis::now();
+            long long read_ms = std::chrono::duration_cast<ms>(skaitymo_pabaiga - pradzia).count();
+            
+            long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
+            klasifikuoti_ir_irasyti(visi, b,
+                "vargsiukai_palyginimo_" + std::to_string(N) + "_list.txt",
+                "kietakiai_palyginimo_" + std::to_string(N) + "_list.txt",
+                skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+                
+            long long viso_ms = read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms;
+            
+            cout << "List:   " << viso_ms << "ms (skaitymas: " << read_ms
+                 << "ms, skirstymas: " << skirstymo_ms << "ms, rūšiavimas: " << rusiavimo_ms
+                 << "ms, įrašymas: " << irasymo_ms << "ms)\n";
+                 
+            palyginimo_rezultatai << N << ",list," << read_ms << "," << skirstymo_ms
+                                 << "," << rusiavimo_ms << "," << irasymo_ms << "," << viso_ms << "\n";
+        }
+    }
+    
+    palyginimo_rezultatai.close();
+    cout << "\nPalyginimo rezultatai išsaugoti į 'konteineriu_palyginimas.txt'\n";
+}
+
 template<typename Container>
 void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     auto rs = Laikmatis::now();
@@ -200,14 +263,17 @@ void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     long long read_ms = std::chrono::duration_cast<ms>(re - rs).count();
 
     string bazinis = be_priesdelio(fname);
-    long long c = 0, w = 0;
+    long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
     klasifikuoti_ir_irasyti(visi, budas, "vargsiukai_" + bazinis + ".txt",
-                             "kietakiai_" + bazinis + ".txt", c, w, rikiavimas);
+                             "kietakiai_" + bazinis + ".txt",
+                             skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiavimas);
 
     cout << "Failas: " << fname
-         << " Skaitymas=" << read_ms
-         << "ms, Klasifikavimas=" << c
-         << "ms, Įrašymas=" << w << "ms\n";
+         << "\n  Skaitymas: " << read_ms << "ms"
+         << "\n  Skirstymas: " << skirstymo_ms << "ms"
+         << "\n  Rūšiavimas: " << rusiavimo_ms << "ms"
+         << "\n  Įrašymas: " << irasymo_ms << "ms"
+         << "\n  Viso: " << (read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms) << "ms\n";
 }
 
 template<typename Container>
@@ -258,10 +324,17 @@ int main() {
          << " g - sugeneruoti failą ir naudoti jį\n"
          << " p - įvesti/generuoti patiems\n"
          << " t - testuoti (5 dydžiai, 5 kartai)\n"
+         << " c - konteinerių palyginimas (vector vs list)\n"
          << " Pasirinkimas: ";
 
     char rez; cin >> rez;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    if (rez == 'c' || rez == 'C') {
+        testavimo_rezimas = true;
+        testuoti_konteinerius();
+        return 0;
+    }
 
     cout << "Pasirinkite konteinerio tipą:\n"
          << " v - std::vector\n"
@@ -288,10 +361,10 @@ int main() {
         string konteinerio_pavadinimas = (konteinerio_tipas == 'v' ? "vector" : "list");
         ofstream rezultatai("rezultatai_testai_" + konteinerio_pavadinimas + ".txt");
         rezultatai << "Konteineris: " << konteinerio_pavadinimas << "\n";
-        rezultatai << "Dydis, Gen(ms), Skaitymas(ms), Klasifikavimas(ms), Įrašymas(ms)\n";
+        rezultatai << "Dydis, Gen(ms), Skaitymas(ms), Skirstymas(ms), Rūšiavimas(ms), Įrašymas(ms), Viso(ms)\n";
 
         for (int N : dydziai) {
-            long long gen_sum = 0, read_sum = 0, klas_sum = 0, iras_sum = 0;
+            long long gen_sum = 0, read_sum = 0, skirstymo_sum = 0, rusiavimo_sum = 0, irasymo_sum = 0;
 
             for (int k = 0; k < 5; k++) {
                 string fname = "test_" + std::to_string(N) + ".txt";
@@ -307,33 +380,43 @@ int main() {
                     auto r_e = Laikmatis::now();
                     read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
 
-                    long long c = 0, w = 0;
+                    long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
                     klasifikuoti_ir_irasyti(visi, b,
                         "vargsiukai_test_" + std::to_string(N) + "_vector.txt",
                         "kietakiai_test_" + std::to_string(N) + "_vector.txt",
-                        c, w, rikiuoti_kriterijus);
-                    klas_sum += c; iras_sum += w;
+                        skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+                    skirstymo_sum += skirstymo_ms;
+                    rusiavimo_sum += rusiavimo_ms;
+                    irasymo_sum += irasymo_ms;
                 } else {
                     list<Studentas> visi = nuskaityti_i_list(fname);
                     auto r_e = Laikmatis::now();
                     read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
 
-                    long long c = 0, w = 0;
+                    long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
                     klasifikuoti_ir_irasyti(visi, b,
                         "vargsiukai_test_" + std::to_string(N) + "_list.txt",
                         "kietakiai_test_" + std::to_string(N) + "_list.txt",
-                        c, w, rikiuoti_kriterijus);
-                    klas_sum += c; iras_sum += w;
+                        skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+                    skirstymo_sum += skirstymo_ms;
+                    rusiavimo_sum += rusiavimo_ms;
+                    irasymo_sum += irasymo_ms;
                 }
             }
 
-            cout << "n=" << N << ": gen=" << gen_sum/5
-                 << "ms, skaitymas=" << read_sum/5
-                 << "ms, klasifikavimas=" << klas_sum/5
-                 << "ms, įrašymas=" << iras_sum/5 << "ms\n";
+            long long viso_sum = read_sum + skirstymo_sum + rusiavimo_sum + irasymo_sum;
+            
+            cout << "n=" << N << ":\n"
+                 << "  gen=" << gen_sum/5 << "ms"
+                 << ", skaitymas=" << read_sum/5 << "ms"
+                 << ", skirstymas=" << skirstymo_sum/5 << "ms"
+                 << ", rūšiavimas=" << rusiavimo_sum/5 << "ms"
+                 << ", įrašymas=" << irasymo_sum/5 << "ms"
+                 << ", viso=" << viso_sum/5 << "ms\n";
 
             rezultatai << N << " " << gen_sum/5 << " " << read_sum/5
-                        << " " << klas_sum/5 << " " << iras_sum/5 << "\n";
+                        << " " << skirstymo_sum/5 << " " << rusiavimo_sum/5
+                        << " " << irasymo_sum/5 << " " << viso_sum/5 << "\n";
         }
 
         rezultatai.close();
@@ -387,20 +470,24 @@ int main() {
             
             cout << "Balo būdas (v/m/a): ";
             char b; cin >> b;
-            long long c = 0, w = 0;
+            long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
             klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis_vector.txt",
-                                   "kietakiai_rankinis_vector.txt", c, w, rikiuoti_kriterijus);
-            cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
+                                   "kietakiai_rankinis_vector.txt",
+                                   skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+            cout << "Išvesta. Skirstymas=" << skirstymo_ms << "ms, Rūšiavimas=" << rusiavimo_ms
+                 << "ms, Įrašymas=" << irasymo_ms << "ms\n";
         } else {
             list<Studentas> visi;
             rankinis_ivedimas(visi);
             
             cout << "Balo būdas (v/m/a): ";
             char b; cin >> b;
-            long long c = 0, w = 0;
+            long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
             klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis_list.txt",
-                                   "kietakiai_rankinis_list.txt", c, w, rikiuoti_kriterijus);
-            cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
+                                   "kietakiai_rankinis_list.txt",
+                                   skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+            cout << "Išvesta. Skirstymas=" << skirstymo_ms << "ms, Rūšiavimas=" << rusiavimo_ms
+                 << "ms, Įrašymas=" << irasymo_ms << "ms\n";
         }
         return 0;
     }
