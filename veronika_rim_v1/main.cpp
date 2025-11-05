@@ -292,6 +292,9 @@ int main() {
             Studentas s;
             cout << "Vardas: "; cin >> s.vard;
             cout << "Pavardė: "; cin >> s.pav;
+            
+            cout << "Objekto adresas atmintyje: " << &s << endl;
+            
             cout << "Generuoti (r) ar įvesti (i)? ";
             char pas; cin >> pas;
 
@@ -312,6 +315,9 @@ int main() {
                 s.egzas = gen_paz();
             }
             visi.push_back(s);
+            
+            cout << "Elemento adresas konteineryje: " << &visi.back() << endl;
+            
             cout << "Dar pridėti? (t/T): "; cin >> dar;
         }
 
