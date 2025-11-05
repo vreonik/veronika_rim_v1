@@ -182,7 +182,69 @@ list<Studentas> nuskaityti_i_list(const std::string& failas) {
     return result;
 }
 
-void testuoti_konteinerius() {
+void testuoti_konteinerius_su_failu(const string& fname) {
+    char b = 'v';
+    char rikiuoti_kriterijus = 'v';
+    
+    cout << "Konteinerių palyginimo testas su failu: " << fname << "\n";
+    
+    ofstream palyginimo_rezultatai("konteineriu_palyginimas_su_failu.txt", std::ios::app);
+    palyginimo_rezultatai << "\nFailas: " << fname << "\n";
+    palyginimo_rezultatai << "Dydis, Konteineris, Skaitymas(ms), Skirstymas(ms), Rūšiavimas(ms), Įrašymas(ms), Viso(ms)\n";
+
+    auto temp_visi = nuskaityti(fname);
+    int N = temp_visi.size();
+    cout << "Failo dydis: " << N << " įrašų\n";
+    
+    {
+        auto pradzia = Laikmatis::now();
+        vector<Studentas> visi = nuskaityti(fname);
+        auto skaitymo_pabaiga = Laikmatis::now();
+        long long read_ms = std::chrono::duration_cast<ms>(skaitymo_pabaiga - pradzia).count();
+        
+        long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
+        klasifikuoti_ir_irasyti(visi, b,
+            "vargsiukai_palyginimo_" + be_priesdelio(fname) + "_vector.txt",
+            "kietakiai_palyginimo_" + be_priesdelio(fname) + "_vector.txt",
+            skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+            
+        long long viso_ms = read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms;
+        
+        cout << "Vector: " << viso_ms << "ms (skaitymas: " << read_ms
+             << "ms, skirstymas: " << skirstymo_ms << "ms, rūšiavimas: " << rusiavimo_ms
+             << "ms, įrašymas: " << irasymo_ms << "ms)\n";
+             
+        palyginimo_rezultatai << N << ",vector," << read_ms << "," << skirstymo_ms
+                             << "," << rusiavimo_ms << "," << irasymo_ms << "," << viso_ms << "\n";
+    }
+    
+    {
+        auto pradzia = Laikmatis::now();
+        list<Studentas> visi = nuskaityti_i_list(fname);
+        auto skaitymo_pabaiga = Laikmatis::now();
+        long long read_ms = std::chrono::duration_cast<ms>(skaitymo_pabaiga - pradzia).count();
+        
+        long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
+        klasifikuoti_ir_irasyti(visi, b,
+            "vargsiukai_palyginimo_" + be_priesdelio(fname) + "_list.txt",
+            "kietakiai_palyginimo_" + be_priesdelio(fname) + "_list.txt",
+            skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+            
+        long long viso_ms = read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms;
+        
+        cout << "List:   " << viso_ms << "ms (skaitymas: " << read_ms
+             << "ms, skirstymas: " << skirstymo_ms << "ms, rūšiavimas: " << rusiavimo_ms
+             << "ms, įrašymas: " << irasymo_ms << "ms)\n";
+             
+        palyginimo_rezultatai << N << ",list," << read_ms << "," << skirstymo_ms
+                             << "," << rusiavimo_ms << "," << irasymo_ms << "," << viso_ms << "\n";
+    }
+    
+    palyginimo_rezultatai.close();
+    cout << "\nPalyginimo rezultatai išsaugoti į 'konteineriu_palyginimas_su_failu.txt'\n";
+}
+
+void testuoti_konteinerius_sugeneruotus() {
     vector<int> dydziai = {1000, 10000, 100000, 1000000};
     int nd_kiek = 5;
     char b = 'v';
@@ -190,7 +252,7 @@ void testuoti_konteinerius() {
     
     cout << "Konteinerių palyginimo testas su " << dydziai.size() << " dydžiais:\n";
     
-    ofstream palyginimo_rezultatai("konteineriu_palyginimas.txt");
+    ofstream palyginimo_rezultatai("konteineriu_palyginimas_sugeneruoti.txt");
     palyginimo_rezultatai << "Dydis, Konteineris, Skaitymas(ms), Skirstymas(ms), Rūšiavimas(ms), Įrašymas(ms), Viso(ms)\n";
 
     for (int N : dydziai) {
@@ -245,7 +307,7 @@ void testuoti_konteinerius() {
     }
     
     palyginimo_rezultatai.close();
-    cout << "\nPalyginimo rezultatai išsaugoti į 'konteineriu_palyginimas.txt'\n";
+    cout << "\nPalyginimo rezultatai išsaugoti į 'konteineriu_palyginimas_sugeneruoti.txt'\n";
 }
 
 template<typename Container>
@@ -332,7 +394,21 @@ int main() {
 
     if (rez == 'c' || rez == 'C') {
         testavimo_rezimas = true;
-        testuoti_konteinerius();
+        
+        cout << "Konteinerių palyginimo pasirinkimas:\n"
+             << " s - sugeneruoti naujus failus\n"
+             << " e - naudoti esamą failą\n"
+             << " Pasirinkimas: ";
+        char palyginimo_tipas; cin >> palyginimo_tipas;
+        
+        if (palyginimo_tipas == 'e' || palyginimo_tipas == 'E') {
+            cout << "Įveskite failo pavadinimą: ";
+            string fname; getline(cin, fname);
+            if (fname.empty()) fname = "kursiokai.txt";
+            testuoti_konteinerius_su_failu(fname);
+        } else {
+            testuoti_konteinerius_sugeneruotus();
+        }
         return 0;
     }
 
