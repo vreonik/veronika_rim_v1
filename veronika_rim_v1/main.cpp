@@ -192,6 +192,12 @@ int main() {
     char rez; cin >> rez;
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
+    cout << "Pasirinkite konteinerio tipą:\n"
+         << " v - std::vector\n"
+         << " l - std::list\n"
+         << " Pasirinkimas: ";
+    char konteinerio_tipas; cin >> konteinerio_tipas;
+
     cout << "Rikiuoti pagal:\n"
          << " v - vidurkį\n"
          << " m - medianą\n"
@@ -209,6 +215,7 @@ int main() {
         char b; cin >> b;
 
         ofstream rezultatai("rezultatai_testai.txt");
+        rezultatai << "Konteineris: " << (konteinerio_tipas == 'v' ? "vector" : "list") << "\n";
         rezultatai << "Dydis, Gen(ms), Skaitymas(ms), Klasifikavimas(ms), Įrašymas(ms)\n";
 
         for (int N : dydziai) {
