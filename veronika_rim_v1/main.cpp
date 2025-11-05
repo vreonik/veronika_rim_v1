@@ -107,6 +107,11 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
 
     vector<pair<Studentas, pair<double,double>>> vargsiukai, kietakiai;
 
+    if (std::distance(visi_stud.begin(), visi_stud.end()) > 100000) {
+        vargsiukai.reserve(std::distance(visi_stud.begin(), visi_stud.end()) / 2);
+        kietakiai.reserve(std::distance(visi_stud.begin(), visi_stud.end()) / 2);
+    }
+
     for (const auto &s : visi_stud) {
         auto [galut_vid, galut_med] = skaiciuoti_galutinius(s);
         double galutinis = (pasirinkimas == 'v' || pasirinkimas == 'V') ? galut_vid :
@@ -245,23 +250,34 @@ void testuoti_konteinerius_su_failu(const string& fname) {
 }
 
 void testuoti_konteinerius_sugeneruotus() {
-    vector<int> dydziai = {1000, 10000, 100000, 1000000};
+    vector<int> dydziai = {1000, 10000, 100000, 1000000, 10000000};
     int nd_kiek = 5;
     char b = 'v';
     char rikiuoti_kriterijus = 'v';
     
     cout << "Konteinerių palyginimo testas su " << dydziai.size() << " dydžiais:\n";
+    cout << "Dydžiai: ";
+    for (int dydis : dydziai) {
+        cout << dydis << " ";
+    }
+    cout << "\n";
     
     ofstream palyginimo_rezultatai("konteineriu_palyginimas_sugeneruoti.txt");
     palyginimo_rezultatai << "Dydis, Konteineris, Skaitymas(ms), Skirstymas(ms), Rūšiavimas(ms), Įrašymas(ms), Viso(ms)\n";
 
     for (int N : dydziai) {
-        cout << "\n=== Testas su " << N << " įrašų ===\n";
+        cout << "\n=== Testas su " << N << " įrašų\n";
         
         string fname = "palyginimo_test_" + std::to_string(N) + ".txt";
+        
+        cout << "Generuojamas failas...";
+        auto gen_pradzia = Laikmatis::now();
         generuoti_faila(N, fname, nd_kiek);
+        auto gen_pabaiga = Laikmatis::now();
+        cout << "Sugeneruota per " << std::chrono::duration_cast<ms>(gen_pabaiga - gen_pradzia).count() << "ms\n";
         
         {
+            cout << "Testuojamas vector... ";
             auto pradzia = Laikmatis::now();
             vector<Studentas> visi = nuskaityti(fname);
             auto skaitymo_pabaiga = Laikmatis::now();
@@ -284,6 +300,7 @@ void testuoti_konteinerius_sugeneruotus() {
         }
         
         {
+            cout << "Testuojamas list... ";
             auto pradzia = Laikmatis::now();
             list<Studentas> visi = nuskaityti_i_list(fname);
             auto skaitymo_pabaiga = Laikmatis::now();
@@ -304,10 +321,46 @@ void testuoti_konteinerius_sugeneruotus() {
             palyginimo_rezultatai << N << ",list," << read_ms << "," << skirstymo_ms
                                  << "," << rusiavimo_ms << "," << irasymo_ms << "," << viso_ms << "\n";
         }
+        
+        if (N >= 1000000) {
+            cout << "Atminties valymas...\n";
+        }
     }
     
     palyginimo_rezultatai.close();
     cout << "\nPalyginimo rezultatai išsaugoti į 'konteineriu_palyginimas_sugeneruoti.txt'\n";
+}
+
+void testuoti_konteinerius_su_pasirinktu_failu() {
+    cout << "Įveskite failo pavadinimą konteinerių palyginimui: ";
+    string fname;
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    getline(cin, fname);
+    
+    if (fname.empty()) {
+        fname = "kursiokai.txt";
+    }
+
+    std::ifstream testas(fname);
+    if (!testas.good()) {
+        cout << "Klaida: Failas '" << fname << "' neegzistuoja!\n";
+        cout << "Ar norite sugeneruoti naują failą? (t/n): ";
+        char pasirinkimas;
+        cin >> pasirinkimas;
+        if (pasirinkimas == 't' || pasirinkimas == 'T') {
+            cout << "Kiek įrašų generuoti? ";
+            int N; cin >> N;
+            cout << "Kiek ND pažymių? ";
+            int nd; cin >> nd;
+            generuoti_faila(N, fname, nd);
+            cout << "Failas '" << fname << "' sugeneruotas.\n";
+        } else {
+            return;
+        }
+    }
+    testas.close();
+    
+    testuoti_konteinerius_su_failu(fname);
 }
 
 template<typename Container>
@@ -398,14 +451,14 @@ int main() {
         cout << "Konteinerių palyginimo pasirinkimas:\n"
              << " s - sugeneruoti naujus failus\n"
              << " e - naudoti esamą failą\n"
+             << " p - pasirinkti failą patiems\n"
              << " Pasirinkimas: ";
         char palyginimo_tipas; cin >> palyginimo_tipas;
         
         if (palyginimo_tipas == 'e' || palyginimo_tipas == 'E') {
-            cout << "Įveskite failo pavadinimą: ";
-            string fname; getline(cin, fname);
-            if (fname.empty()) fname = "kursiokai.txt";
-            testuoti_konteinerius_su_failu(fname);
+            testuoti_konteinerius_sugeneruotus();
+        } else if (palyginimo_tipas == 'p' || palyginimo_tipas == 'P') {
+            testuoti_konteinerius_su_pasirinktu_failu();
         } else {
             testuoti_konteinerius_sugeneruotus();
         }
@@ -428,9 +481,14 @@ int main() {
     if (rez == 't' || rez == 'T') {
         testavimo_rezimas = true;
 
-        vector<int> dydziai = {100, 1000, 10000, 100000, 1000000};
+        vector<int> dydziai = {100, 1000, 10000, 100000, 1000000, 10000000};
         int nd_kiek = 5;
-        cout << "Testavimas 5 dydžiais, po 5 kartus.\n";
+        cout << "Testavimas " << dydziai.size() << " dydžiais, po 5 kartus.\n";
+        cout << "Dydžiai: ";
+        for (int dydis : dydziai) {
+            cout << dydis << " ";
+        }
+        cout << "\n";
         cout << "Galutinio balo būdas (v/m): ";
         char b; cin >> b;
 
@@ -501,7 +559,8 @@ int main() {
     }
     if (rez == 'g' || rez == 'G') {
         cout << "Failo pavadinimas: ";
-        string fname; getline(cin, fname);
+        string fname;
+        getline(cin, fname);
         if (fname.empty()) fname = "kursiokai.txt";
         cout << "Kiek įrašų generuoti? "; int N; cin >> N;
         cout << "Kiek ND pažymių? "; int nd; cin >> nd;
@@ -527,7 +586,8 @@ int main() {
 
     if (rez == 'f' || rez == 'F') {
         cout << "Failo pavadinimas: ";
-        string fname; getline(cin, fname);
+        string fname;
+        getline(cin, fname);
         if (fname.empty()) fname = "kursiokai.txt";
         cout << "Balo būdas (v/m/a): ";
         char b; cin >> b;
