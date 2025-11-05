@@ -90,7 +90,8 @@ void spausdinti_perziura(const vector<Studentas>& visi_stud, char pasirinkimas, 
         cout << "... ir dar " << (visi_stud.size() - limitas) << " įrašų.\n";
 }
 
-void klasifikuoti_ir_irasyti(const vector<Studentas> &visi_stud,
+template<typename Container>
+void klasifikuoti_ir_irasyti(const Container &visi_stud,
                              char pasirinkimas,
                              const string &failas_vargsiukai,
                              const string &failas_kietakiai,
@@ -159,13 +160,23 @@ void klasifikuoti_ir_irasyti(const vector<Studentas> &visi_stud,
     auto ras_pabaiga = high_resolution_clock::now();
     irasymo_ms = duration_cast<milliseconds>(ras_pabaiga - ras_pradzia).count();
 
-    spausdinti_perziura(visi_stud, pasirinkimas);
+    vector<Studentas> temp_visi;
+    for (const auto &s : visi_stud) {
+        temp_visi.push_back(s);
+    }
+    spausdinti_perziura(temp_visi, pasirinkimas);
 }
 
-
+template<typename Container>
 void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     auto rs = Laikmatis::now();
-    vector<Studentas> visi = nuskaityti(fname);
+    Container visi;
+    
+    auto temp_visi = nuskaityti(fname);
+    for (const auto& s : temp_visi) {
+        visi.push_back(s);
+    }
+    
     auto re = Laikmatis::now();
     long long read_ms = std::chrono::duration_cast<ms>(re - rs).count();
 
@@ -229,15 +240,32 @@ int main() {
                 gen_sum += std::chrono::duration_cast<ms>(g_e - g_s).count();
 
                 auto r_s = Laikmatis::now();
-                vector<Studentas> visi = nuskaityti(fname);
-                auto r_e = Laikmatis::now();
-                read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
+                
+                if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
+                    vector<Studentas> visi;
+                    auto temp_visi = nuskaityti(fname);
+                    for (const auto& s : temp_visi) {
+                        visi.push_back(s);
+                    }
+                    auto r_e = Laikmatis::now();
+                    read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
 
-                long long c = 0, w = 0;
-                klasifikuoti_ir_irasyti(visi, b,
-                    "vargsiukai_test_" + std::to_string(N) + ".txt",
-                    "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
-                klas_sum += c; iras_sum += w;
+                    long long c = 0, w = 0;
+                    klasifikuoti_ir_irasyti(visi, b,
+                        "vargsiukai_test_" + std::to_string(N) + ".txt",
+                        "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
+                    klas_sum += c; iras_sum += w;
+                } else {
+                    vector<Studentas> visi = nuskaityti(fname);
+                    auto r_e = Laikmatis::now();
+                    read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
+
+                    long long c = 0, w = 0;
+                    klasifikuoti_ir_irasyti(visi, b,
+                        "vargsiukai_test_" + std::to_string(N) + ".txt",
+                        "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
+                    klas_sum += c; iras_sum += w;
+                }
             }
 
             cout << "n=" << N << ": gen=" << gen_sum/5
@@ -270,7 +298,11 @@ int main() {
         if (d == 't' || d == 'T') {
             cout << "Balo būdas (v/m/a): ";
             char b; cin >> b;
-            apdoroti_faila(fname, b, rikiuoti_kriterijus);
+            if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
+                apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+            } else {
+                apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+            }
         }
         return 0;
     }
@@ -281,7 +313,11 @@ int main() {
         if (fname.empty()) fname = "kursiokai.txt";
         cout << "Balo būdas (v/m/a): ";
         char b; cin >> b;
-        apdoroti_faila(fname, b, rikiuoti_kriterijus);
+        if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
+            apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+        } else {
+            apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+        }
         return 0;
     }
 
