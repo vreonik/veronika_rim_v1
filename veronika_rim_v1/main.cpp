@@ -93,6 +93,16 @@ void spausdinti_perziura(const Container& visi_stud, char pasirinkimas, int limi
         cout << "... ir dar " << (std::distance(visi_stud.begin(), visi_stud.end()) - limitas) << " įrašų.\n";
 }
 
+template<typename T>
+void rusiuoti_list(T& container, auto rikiuoti) {
+    container.sort(rikiuoti);
+}
+
+template<typename T>
+void rusiuoti_vector(T& container, auto rikiuoti) {
+    sort(container.begin(), container.end(), rikiuoti);
+}
+
 template<typename Container>
 void klasifikuoti_ir_irasyti(const Container &visi_stud,
                              char pasirinkimas,
