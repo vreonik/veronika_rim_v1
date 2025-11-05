@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <list>
 #include <string>
 #include <algorithm>
 #include <sstream>
@@ -18,6 +19,7 @@ using std::cin;
 using std::endl;
 using std::string;
 using std::vector;
+using std::list;
 using std::fixed;
 using std::setprecision;
 using std::sort;
@@ -56,7 +58,8 @@ pair<double,double> skaiciuoti_galutinius(const Studentas &s){
 
 bool testavimo_rezimas = false;
 
-void spausdinti_perziura(const vector<Studentas>& visi_stud, char pasirinkimas, int limitas = 10) {
+template<typename Container>
+void spausdinti_perziura(const Container& visi_stud, char pasirinkimas, int limitas = 10) {
     if (testavimo_rezimas) return;
 
     cout << "\nPirmi " << limitas << " studentų (peržiūra):\n";
@@ -86,8 +89,8 @@ void spausdinti_perziura(const vector<Studentas>& visi_stud, char pasirinkimas, 
                  << left << setw(20) << gmed;
         cout << "\n";
     }
-    if ((int)visi_stud.size() > limitas)
-        cout << "... ir dar " << (visi_stud.size() - limitas) << " įrašų.\n";
+    if (std::distance(visi_stud.begin(), visi_stud.end()) > limitas)
+        cout << "... ir dar " << (std::distance(visi_stud.begin(), visi_stud.end()) - limitas) << " įrašų.\n";
 }
 
 template<typename Container>
@@ -160,11 +163,16 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
     auto ras_pabaiga = high_resolution_clock::now();
     irasymo_ms = duration_cast<milliseconds>(ras_pabaiga - ras_pradzia).count();
 
-    vector<Studentas> temp_visi;
-    for (const auto &s : visi_stud) {
-        temp_visi.push_back(s);
+    spausdinti_perziura(visi_stud, pasirinkimas);
+}
+
+list<Studentas> nuskaityti_i_list(const std::string& failas) {
+    auto temp_visi = nuskaityti(failas);
+    list<Studentas> result;
+    for (const auto& s : temp_visi) {
+        result.push_back(s);
     }
-    spausdinti_perziura(temp_visi, pasirinkimas);
+    return result;
 }
 
 template<typename Container>
@@ -172,9 +180,10 @@ void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     auto rs = Laikmatis::now();
     Container visi;
     
-    auto temp_visi = nuskaityti(fname);
-    for (const auto& s : temp_visi) {
-        visi.push_back(s);
+    if constexpr (std::is_same_v<Container, vector<Studentas>>) {
+        visi = nuskaityti(fname);
+    } else {
+        visi = nuskaityti_i_list(fname);
     }
     
     auto re = Laikmatis::now();
@@ -186,9 +195,50 @@ void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
                              "kietakiai_" + bazinis + ".txt", c, w, rikiavimas);
 
     cout << "Failas: " << fname
-         << "Skaitymas=" << read_ms
+         << " Skaitymas=" << read_ms
          << "ms, Klasifikavimas=" << c
          << "ms, Įrašymas=" << w << "ms\n";
+}
+
+template<typename Container>
+void rankinis_ivedimas(Container& visi) {
+    char dar = 't';
+    while (dar == 't' || dar == 'T') {
+        Studentas s;
+        cout << "Vardas: "; cin >> s.vard;
+        cout << "Pavardė: "; cin >> s.pav;
+        
+        cout << "Objekto adresas atmintyje: " << &s << endl;
+        
+        cout << "Generuoti (r) ar įvesti (i)? ";
+        char pas; cin >> pas;
+
+        if (pas == 'i' || pas == 'I') {
+            cout << "Įveskite ND (tuščia eilutė - pabaiga):\n";
+            while (true) {
+                cout << "Pažymys: ";
+                string eil; cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                getline(cin, eil);
+                if (eil.empty()) break;
+                stringstream ss(eil);
+                int nd; if (ss >> nd) s.nd.push_back(nd);
+            }
+            cout << "Egzamino pažymys: "; cin >> s.egzas;
+        } else {
+            int kiek; cout << "Kiek ND generuoti? "; cin >> kiek;
+            for (int i = 0; i < kiek; i++) s.nd.push_back(gen_paz());
+            s.egzas = gen_paz();
+        }
+        visi.push_back(s);
+        
+        if constexpr (std::is_same_v<Container, vector<Studentas>>) {
+            cout << "Elemento adresas vektoriuje: " << &visi.back() << endl;
+        } else {
+            cout << "Paskutinio elemento adresas liste: " << &visi.back() << endl;
+        }
+        
+        cout << "Dar pridėti? (t/T): "; cin >> dar;
+    }
 }
 
 
@@ -225,8 +275,9 @@ int main() {
         cout << "Galutinio balo būdas (v/m): ";
         char b; cin >> b;
 
-        ofstream rezultatai("rezultatai_testai.txt");
-        rezultatai << "Konteineris: " << (konteinerio_tipas == 'v' ? "vector" : "list") << "\n";
+        string konteinerio_pavadinimas = (konteinerio_tipas == 'v' ? "vector" : "list");
+        ofstream rezultatai("rezultatai_testai_" + konteinerio_pavadinimas + ".txt");
+        rezultatai << "Konteineris: " << konteinerio_pavadinimas << "\n";
         rezultatai << "Dydis, Gen(ms), Skaitymas(ms), Klasifikavimas(ms), Įrašymas(ms)\n";
 
         for (int N : dydziai) {
@@ -242,28 +293,26 @@ int main() {
                 auto r_s = Laikmatis::now();
                 
                 if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
-                    vector<Studentas> visi;
-                    auto temp_visi = nuskaityti(fname);
-                    for (const auto& s : temp_visi) {
-                        visi.push_back(s);
-                    }
-                    auto r_e = Laikmatis::now();
-                    read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
-
-                    long long c = 0, w = 0;
-                    klasifikuoti_ir_irasyti(visi, b,
-                        "vargsiukai_test_" + std::to_string(N) + ".txt",
-                        "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
-                    klas_sum += c; iras_sum += w;
-                } else {
                     vector<Studentas> visi = nuskaityti(fname);
                     auto r_e = Laikmatis::now();
                     read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
 
                     long long c = 0, w = 0;
                     klasifikuoti_ir_irasyti(visi, b,
-                        "vargsiukai_test_" + std::to_string(N) + ".txt",
-                        "kietakiai_test_" + std::to_string(N) + ".txt", c, w, rikiuoti_kriterijus);
+                        "vargsiukai_test_" + std::to_string(N) + "_vector.txt",
+                        "kietakiai_test_" + std::to_string(N) + "_vector.txt",
+                        c, w, rikiuoti_kriterijus);
+                    klas_sum += c; iras_sum += w;
+                } else {
+                    list<Studentas> visi = nuskaityti_i_list(fname);
+                    auto r_e = Laikmatis::now();
+                    read_sum += std::chrono::duration_cast<ms>(r_e - r_s).count();
+
+                    long long c = 0, w = 0;
+                    klasifikuoti_ir_irasyti(visi, b,
+                        "vargsiukai_test_" + std::to_string(N) + "_list.txt",
+                        "kietakiai_test_" + std::to_string(N) + "_list.txt",
+                        c, w, rikiuoti_kriterijus);
                     klas_sum += c; iras_sum += w;
                 }
             }
@@ -278,7 +327,7 @@ int main() {
         }
 
         rezultatai.close();
-        cout << "\nRezultatai išsaugoti į 'rezultatai_testai.txt'\n";
+        cout << "\nRezultatai išsaugoti į 'rezultatai_testai_" << konteinerio_pavadinimas << ".txt'\n";
         return 0;
     }
     if (rez == 'g' || rez == 'G') {
@@ -301,7 +350,7 @@ int main() {
             if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
                 apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
             } else {
-                apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+                apdoroti_faila<list<Studentas>>(fname, b, rikiuoti_kriterijus);
             }
         }
         return 0;
@@ -316,52 +365,33 @@ int main() {
         if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
             apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
         } else {
-            apdoroti_faila<vector<Studentas>>(fname, b, rikiuoti_kriterijus);
+            apdoroti_faila<list<Studentas>>(fname, b, rikiuoti_kriterijus);
         }
         return 0;
     }
 
     if (rez == 'p' || rez == 'P') {
-        vector<Studentas> visi;
-        char dar = 't';
-        while (dar == 't' || dar == 'T') {
-            Studentas s;
-            cout << "Vardas: "; cin >> s.vard;
-            cout << "Pavardė: "; cin >> s.pav;
+        if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
+            vector<Studentas> visi;
+            rankinis_ivedimas(visi);
             
-            cout << "Objekto adresas atmintyje: " << &s << endl;
+            cout << "Balo būdas (v/m/a): ";
+            char b; cin >> b;
+            long long c = 0, w = 0;
+            klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis_vector.txt",
+                                   "kietakiai_rankinis_vector.txt", c, w, rikiuoti_kriterijus);
+            cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
+        } else {
+            list<Studentas> visi;
+            rankinis_ivedimas(visi);
             
-            cout << "Generuoti (r) ar įvesti (i)? ";
-            char pas; cin >> pas;
-
-            if (pas == 'i' || pas == 'I') {
-                cout << "Įveskite ND (tuščia eilutė - pabaiga):\n";
-                while (true) {
-                    cout << "Pažymys: ";
-                    string eil; cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    getline(cin, eil);
-                    if (eil.empty()) break;
-                    stringstream ss(eil);
-                    int nd; if (ss >> nd) s.nd.push_back(nd);
-                }
-                cout << "Egzamino pažymys: "; cin >> s.egzas;
-            } else {
-                int kiek; cout << "Kiek ND generuoti? "; cin >> kiek;
-                for (int i = 0; i < kiek; i++) s.nd.push_back(gen_paz());
-                s.egzas = gen_paz();
-            }
-            visi.push_back(s);
-            
-            cout << "Elemento adresas konteineryje: " << &visi.back() << endl;
-            
-            cout << "Dar pridėti? (t/T): "; cin >> dar;
+            cout << "Balo būdas (v/m/a): ";
+            char b; cin >> b;
+            long long c = 0, w = 0;
+            klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis_list.txt",
+                                   "kietakiai_rankinis_list.txt", c, w, rikiuoti_kriterijus);
+            cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
         }
-
-        cout << "Balo būdas (v/m/a): ";
-        char b; cin >> b;
-        long long c = 0, w = 0;
-        klasifikuoti_ir_irasyti(visi, b, "vargsiukai_rankinis.txt", "kietakiai_rankinis.txt", c, w, rikiuoti_kriterijus);
-        cout << "Išvesta. Klasifikavimas=" << c << "ms, Įrašymas=" << w << "ms\n";
         return 0;
     }
 
