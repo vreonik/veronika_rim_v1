@@ -45,7 +45,6 @@ int main() {
              << " s - sugeneruoti naujus failus\n"
              << " e - naudoti esamą failą\n"
              << " p - pasirinkti failą patiems\n"
-             << " v - testuoti su vidurkiais (3 kartai)\n"
              << " Pasirinkimas: ";
         char palyginimo_tipas;
         cin >> palyginimo_tipas;
