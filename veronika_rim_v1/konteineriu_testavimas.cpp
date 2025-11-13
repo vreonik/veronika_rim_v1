@@ -32,6 +32,7 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
     
     long long vector_skirstymo_sum = 0, vector_rusiavimo_sum = 0;
     long long list_skirstymo_sum = 0, list_rusiavimo_sum = 0;
+    size_t vector_atmintis_sum = 0, list_atmintis_sum = 0;
     
     for (int k = 0; k < testu_kartai; k++) {
         {
@@ -45,14 +46,17 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
                     break;
                 case 2:
                     rez = strategija_2(visi, vargsiukai, b);
+                    (void)rikiuoti_kriterijus;
                     break;
                 case 3:
                     rez = strategija_3(visi, vargsiukai, b);
+                    (void)rikiuoti_kriterijus;
                     break;
             }
             
             vector_skirstymo_sum += rez.skirstymo_laikas;
             vector_rusiavimo_sum += rez.rusiavimo_laikas;
+            vector_atmintis_sum += rez.atmintis_bendra;
         }
         
         {
@@ -66,29 +70,38 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
                     break;
                 case 2:
                     rez = strategija_2(visi, vargsiukai, b);
+                    (void)rikiuoti_kriterijus;
                     break;
                 case 3:
                     rez = strategija_3(visi, vargsiukai, b);
+                    (void)rikiuoti_kriterijus;
                     break;
             }
             
             list_skirstymo_sum += rez.skirstymo_laikas;
             list_rusiavimo_sum += rez.rusiavimo_laikas;
+            list_atmintis_sum += rez.atmintis_bendra;
         }
     }
     
     long long vector_vidurkis = vector_skirstymo_sum / testu_kartai;
     long long list_vidurkis = list_skirstymo_sum / testu_kartai;
+    size_t vector_atmintis_vid = vector_atmintis_sum / testu_kartai;
+    size_t list_atmintis_vid = list_atmintis_sum / testu_kartai;
     
-    cout << "Strategija " << strategijos_nr << " - Vector vidurkis: " << vector_vidurkis << "ms\n";
-    cout << "Strategija " << strategijos_nr << " - List vidurkis:   " << list_vidurkis << "ms\n";
+    cout << "Strategija " << strategijos_nr << " - Vector: " << vector_vidurkis << "ms, "
+         << vector_atmintis_vid / 1024 << " KB\n";
+    cout << "Strategija " << strategijos_nr << " - List:   " << list_vidurkis << "ms, "
+         << list_atmintis_vid / 1024 << " KB\n";
     
     rezultatai << N << ",strategija_" << strategijos_nr << ",vector,"
                << vector_skirstymo_sum/testu_kartai << ","
-               << vector_rusiavimo_sum/testu_kartai << "\n";
+               << vector_rusiavimo_sum/testu_kartai << ","
+               << vector_atmintis_sum/testu_kartai << "\n";
     rezultatai << N << ",strategija_" << strategijos_nr << ",list,"
                << list_skirstymo_sum/testu_kartai << ","
-               << list_rusiavimo_sum/testu_kartai << "\n";
+               << list_rusiavimo_sum/testu_kartai << ","
+               << list_atmintis_sum/testu_kartai << "\n";
 }
 
 void testuoti_visas_strategijas(const string& fname) {
@@ -105,7 +118,7 @@ void testuoti_visas_strategijas(const string& fname) {
     
     ofstream strategiju_rezultatai("strategiju_palyginimas.txt", std::ios::app);
     strategiju_rezultatai << "\nFailas: " << fname << "\n";
-    strategiju_rezultatai << "Dydis, Strategija, Konteineris, Skirstymas(ms), Rūšiavimas(ms)\n";
+    strategiju_rezultatai << "Dydis, Strategija, Konteineris, Skirstymas(ms), Rūšiavimas(ms), Atmintis(baitai)\n";
 
     for (int strategija = 1; strategija <= 3; strategija++) {
         cout << "\n--- Strategija " << strategija << " ---" << endl;
@@ -314,13 +327,13 @@ void testuoti_strategijas_su_visais_dydziais() {
     char b = 'v';
     char rikiuoti_kriterijus = 'v';
     
-    cout << "STRATEGIJŲ PALYGINIMAS SU VISAIS DYDŽIAIS\n";
+    cout << "STRATEGIJŲ PALYGINIMAS SU VISIAIS DYDŽIAIS\n";
     cout << "Testuojami dydžiai: ";
     for (int dydis : dydziai) cout << dydis << " ";
     cout << "\n";
     
     ofstream strategiju_rezultatai("strategiju_palyginimas_visi_dydziai.txt");
-    strategiju_rezultatai << "Dydis, Strategija, Konteineris, Skirstymas(ms), Rūšiavimas(ms)\n";
+    strategiju_rezultatai << "Dydis, Strategija, Konteineris, Skirstymas(ms), Rūšiavimas(ms), Atmintis(baitai)\n";
 
     for (int N : dydziai) {
         cout << "\n=== Dydis: " << N << " ===" << endl;
@@ -342,6 +355,7 @@ void testuoti_strategijas_su_visais_dydziais() {
             auto actual_N = temp_visi.size();
             
             long long vector_sum = 0, list_sum = 0;
+            size_t vector_atmintis = 0, list_atmintis = 0;
             
             for (int k = 0; k < testu_kartai; k++) {
                 {
@@ -355,6 +369,7 @@ void testuoti_strategijas_su_visais_dydziais() {
                         case 3: rez = strategija_3(visi, vargsiukai, b); break;
                     }
                     vector_sum += rez.skirstymo_laikas;
+                    vector_atmintis += rez.atmintis_bendra;
                 }
                 
                 {
@@ -368,16 +383,240 @@ void testuoti_strategijas_su_visais_dydziais() {
                         case 3: rez = strategija_3(visi, vargsiukai, b); break;
                     }
                     list_sum += rez.skirstymo_laikas;
+                    list_atmintis += rez.atmintis_bendra;
                 }
             }
             
             strategiju_rezultatai << actual_N << ",strategija_" << strategija << ",vector,"
-                                << vector_sum/testu_kartai << ",0\n";
+                                << vector_sum/testu_kartai << ",0," << vector_atmintis/testu_kartai << "\n";
             strategiju_rezultatai << actual_N << ",strategija_" << strategija << ",list,"
-                                << list_sum/testu_kartai << ",0\n";
+                                << list_sum/testu_kartai << ",0," << list_atmintis/testu_kartai << "\n";
         }
     }
     
     strategiju_rezultatai.close();
     cout << "\nStrategijų palyginimo rezultatai išsaugoti į 'strategiju_palyginimas_visi_dydziai.txt'\n";
+}
+
+void atlikti_isamiai_analize(const string& fname, int testu_kartai) {
+    cout << "\n=== IŠSAMI STRATEGIJŲ ANALIZĖ ===\n";
+    cout << "Failas: " << fname << endl;
+    
+    auto visi_studentai = nuskaityti(fname);
+    auto N = visi_studentai.size();
+    cout << "Studentų skaičius: " << N << endl;
+    
+    ofstream analizes_failas("strategiju_analize_" + be_priesdelio(fname) + ".csv");
+    analizes_failas << "Strategija,Konteineris,Laikas(ms),Atmintis_KB,Vargsiukai,Kietakiai\n";
+    
+    for (int strategija = 1; strategija <= 3; strategija++) {
+        cout << "\n--- Strategija " << strategija << " ---" << endl;
+        
+        for (int konteineris = 0; konteineris < 2; konteineris++) {
+            long long total_laikas = 0;
+            size_t total_atmintis = 0;
+            size_t total_vargsiukai = 0;
+            size_t total_kietakiai = 0;
+            
+            for (int k = 0; k < testu_kartai; k++) {
+                if (konteineris == 0) {
+                    auto visi = nuskaityti(fname);
+                    vector<Studentas> vargsiukai, kietakiai;
+                    
+                    TestoRezultatai rez;
+                    switch(strategija) {
+                        case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                        case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                        case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                    }
+                    
+                    total_laikas += rez.skirstymo_laikas;
+                    total_atmintis += rez.atmintis_bendra;
+                    total_vargsiukai += vargsiukai.size();
+                    total_kietakiai += (strategija == 1) ? kietakiai.size() : visi.size();
+                } else {
+                    auto visi = nuskaityti_i_list(fname);
+                    list<Studentas> vargsiukai, kietakiai;
+                    
+                    TestoRezultatai rez;
+                    switch(strategija) {
+                        case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                        case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                        case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                    }
+                    
+                    total_laikas += rez.skirstymo_laikas;
+                    total_atmintis += rez.atmintis_bendra;
+                    total_vargsiukai += vargsiukai.size();
+                    total_kietakiai += (strategija == 1) ? kietakiai.size() : visi.size();
+                }
+            }
+            
+            long long vid_laikas = total_laikas / testu_kartai;
+            size_t vid_atmintis = total_atmintis / testu_kartai;
+            size_t vid_vargsiukai = total_vargsiukai / testu_kartai;
+            size_t vid_kietakiai = total_kietakiai / testu_kartai;
+            
+            string konteinerio_pav = (konteineris == 0) ? "vector" : "list";
+            
+            cout << konteinerio_pav << ": " << vid_laikas << "ms, "
+                 << vid_atmintis/1024 << " KB, vargsiukai: " << vid_vargsiukai
+                 << ", kietakiai: " << vid_kietakiai << endl;
+            
+            analizes_failas << strategija << "," << konteinerio_pav << ","
+                           << vid_laikas << "," << vid_atmintis/1024 << ","
+                           << vid_vargsiukai << "," << vid_kietakiai << "\n";
+        }
+    }
+    
+    analizes_failas.close();
+    cout << "\nIšsami analizė išsaugota į: strategiju_analize_" << be_priesdelio(fname) << ".csv\n";
+}
+
+void palyginti_strategijas_pagal_dydi() {
+    vector<int> dydziai = {1000, 10000, 100000, 1000000};
+    int testu_kartai = 3;
+    
+    cout << "\n=== STRATEGIJŲ PALYGINIMAS PAGAL DYDĮ ===\n";
+    
+    ofstream rezultatai("strategiju_palyginimas_pagal_dydi.csv");
+    rezultatai << "Dydis,Strategija,Konteineris,Laikas(ms),Atmintis_KB\n";
+    
+    for (int N : dydziai) {
+        cout << "\nDydis: " << N << endl;
+        
+        string fname = "analize_" + std::to_string(N) + ".txt";
+        
+        std::ifstream testas(fname);
+        if (!testas.good()) {
+            cout << "Generuojamas failas...";
+            generuoti_faila(N, fname, 5);
+            cout << " baigta\n";
+        }
+        testas.close();
+        
+        for (int strategija = 1; strategija <= 3; strategija++) {
+            for (int konteineris = 0; konteineris < 2; konteineris++) {
+                long long total_laikas = 0;
+                size_t total_atmintis = 0;
+                
+                for (int k = 0; k < testu_kartai; k++) {
+                    if (konteineris == 0) {
+                        auto visi = nuskaityti(fname);
+                        vector<Studentas> vargsiukai, kietakiai;
+                        
+                        TestoRezultatai rez;
+                        switch(strategija) {
+                            case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                            case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                            case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                        }
+                        
+                        total_laikas += rez.skirstymo_laikas;
+                        total_atmintis += rez.atmintis_bendra;
+                    } else {
+                        auto visi = nuskaityti_i_list(fname);
+                        list<Studentas> vargsiukai, kietakiai;
+                        
+                        TestoRezultatai rez;
+                        switch(strategija) {
+                            case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                            case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                            case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                        }
+                        
+                        total_laikas += rez.skirstymo_laikas;
+                        total_atmintis += rez.atmintis_bendra;
+                    }
+                }
+                
+                long long vid_laikas = total_laikas / testu_kartai;
+                size_t vid_atmintis = total_atmintis / testu_kartai;
+                string konteinerio_pav = (konteineris == 0) ? "vector" : "list";
+                
+                cout << "S" << strategija << "-" << konteinerio_pav << ": "
+                     << vid_laikas << "ms, " << vid_atmintis/1024 << " KB\n";
+                
+                rezultatai << N << "," << strategija << "," << konteinerio_pav << ","
+                          << vid_laikas << "," << vid_atmintis/1024 << "\n";
+            }
+        }
+    }
+    
+    rezultatai.close();
+    cout << "\nRezultatai išsaugoti į: strategiju_palyginimas_pagal_dydi.csv\n";
+}
+
+void atlikti_greicio_analize() {
+    vector<int> dydziai = {1000, 10000, 100000, 1000000};
+    int testu_kartai = 3;
+    
+    cout << "\n=== GREIČIO ANALIZĖ ===\n";
+    
+    ofstream greicio_failas("strategiju_greicio_analize.csv");
+    greicio_failas << "Dydis,Vector_S1,Vector_S2,Vector_S3,List_S1,List_S2,List_S3\n";
+    
+    for (int N : dydziai) {
+        cout << "Testuojama su " << N << " įrašų..." << endl;
+        
+        string fname = "greicio_test_" + std::to_string(N) + ".txt";
+        
+        std::ifstream testas(fname);
+        if (!testas.good()) {
+            generuoti_faila(N, fname, 5);
+        }
+        testas.close();
+        
+        vector<long long> vid_laikai(6, 0);
+        
+        for (int k = 0; k < testu_kartai; k++) {
+            for (int strategija = 1; strategija <= 3; strategija++) {
+                for (int konteineris = 0; konteineris < 2; konteineris++) {
+                    int index = (strategija - 1) * 2 + konteineris;
+                    
+                    if (konteineris == 0) {
+                        auto visi = nuskaityti(fname);
+                        vector<Studentas> vargsiukai, kietakiai;
+                        
+                        TestoRezultatai rez;
+                        switch(strategija) {
+                            case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                            case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                            case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                        }
+                        
+                        vid_laikai[index] += rez.skirstymo_laikas;
+                    } else {
+                        auto visi = nuskaityti_i_list(fname);
+                        list<Studentas> vargsiukai, kietakiai;
+                        
+                        TestoRezultatai rez;
+                        switch(strategija) {
+                            case 1: rez = strategija_1(visi, vargsiukai, kietakiai, 'v'); break;
+                            case 2: rez = strategija_2(visi, vargsiukai, 'v'); break;
+                            case 3: rez = strategija_3(visi, vargsiukai, 'v'); break;
+                        }
+                        
+                        vid_laikai[index] += rez.skirstymo_laikas;
+                    }
+                }
+            }
+        }
+        
+        for (int i = 0; i < 6; i++) {
+            vid_laikai[i] /= testu_kartai;
+        }
+        
+        greicio_failas << N << ","
+                      << vid_laikai[0] << "," << vid_laikai[2] << "," << vid_laikai[4] << ","
+                      << vid_laikai[1] << "," << vid_laikai[3] << "," << vid_laikai[5] << "\n";
+        
+        cout << "Vector: S1=" << vid_laikai[0] << "ms, S2=" << vid_laikai[2]
+             << "ms, S3=" << vid_laikai[4] << "ms\n";
+        cout << "List:   S1=" << vid_laikai[1] << "ms, S2=" << vid_laikai[3]
+             << "ms, S3=" << vid_laikai[5] << "ms\n";
+    }
+    
+    greicio_failas.close();
+    cout << "\nGreičio analizė išsaugota į: strategiju_greicio_analize.csv\n";
 }

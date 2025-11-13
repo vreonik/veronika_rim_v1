@@ -70,10 +70,14 @@ void naudoti_strategija_su_failu() {
          << " 1 - Dvi naujos grupės (vargsiukai ir kietakiai)\n"
          << " 2 - Viena nauja grupė + trynimas\n"
          << " 3 - STL algoritmai\n"
-         << " 4 - std::partition (greičiausia)\n"
          << " Pasirinkimas: ";
     int strategija;
     cin >> strategija;
+
+    if (strategija < 1 || strategija > 3) {
+        cout << "Neteisingas strategijos pasirinkimas!\n";
+        return;
+    }
 
     cout << "Pasirinkite konteinerio tipą:\n"
          << " v - std::vector\n"
@@ -117,18 +121,12 @@ void naudoti_strategija_su_failu() {
                 rez = strategija_3(visi, vargsiukai, budas);
                 kietakiai = std::move(visi);
                 break;
-            case 4:
-                rez = strategija_3_partition(visi, vargsiukai, budas);
-                kietakiai = std::move(visi);
-                break;
-            default:
-                cout << "Neteisingas strategijos pasirinkimas!\n";
-                return;
         }
         
         cout << "Skirstymas užtruko: " << rez.skirstymo_laikas << "ms\n";
         cout << "Vargsiukų: " << vargsiukai.size() << "\n";
         cout << "Kietakių: " << kietakiai.size() << "\n";
+        cout << "Atmintis: " << rez.atmintis_bendra / 1024 << " KB\n";
         
         long long rusiavimo_ms = 0, irasymo_ms = 0;
         klasifikuoti_ir_irasyti(vargsiukai, budas,
@@ -153,14 +151,12 @@ void naudoti_strategija_su_failu() {
                 rez = strategija_3(visi, vargsiukai, budas);
                 kietakiai = std::move(visi);
                 break;
-            default:
-                cout << "Ši strategija nepalaikoma su list konteineriu!\n";
-                return;
         }
         
         cout << "Skirstymas užtruko: " << rez.skirstymo_laikas << "ms\n";
         cout << "Vargsiukų: " << vargsiukai.size() << "\n";
         cout << "Kietakių: " << kietakiai.size() << "\n";
+        cout << "Atmintis: " << rez.atmintis_bendra / 1024 << " KB\n";
         
         long long rusiavimo_ms = 0, irasymo_ms = 0;
         klasifikuoti_ir_irasyti(vargsiukai, budas,
@@ -173,6 +169,49 @@ void naudoti_strategija_su_failu() {
     cout << "Visas apdorojimas užtruko: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
 }
 
+void rodyti_placia_testavimo_meniu() {
+    cout << "\nPLATŪS TESTAVIMO NUSTATYMAI:\n"
+         << " a - išsami strategijų analizė su failu\n"
+         << " b - strategijų palyginimas pagal dydį\n"
+         << " c - greičio analizė\n"
+         << " d - visi testai iš karto\n"
+         << " Pasirinkimas: ";
+    
+    char pasirinkimas;
+    cin >> pasirinkimas;
+    
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    switch(pasirinkimas) {
+        case 'a': {
+            cout << "Įveskite failo pavadinimą: ";
+            string fname;
+            getline(cin, fname);
+            if (fname.empty()) fname = "kursiokai.txt";
+            atlikti_isamiai_analize(fname);
+            break;
+        }
+        case 'b':
+            palyginti_strategijas_pagal_dydi();
+            break;
+        case 'c':
+            atlikti_greicio_analize();
+            break;
+        case 'd': {
+            cout << "Įveskite failo pavadinimą: ";
+            string fname;
+            getline(cin, fname);
+            if (fname.empty()) fname = "kursiokai.txt";
+            atlikti_isamiai_analize(fname);
+            palyginti_strategijas_pagal_dydi();
+            atlikti_greicio_analize();
+            break;
+        }
+        default:
+            cout << "Neteisingas pasirinkimas!\n";
+    }
+}
+
 int main() {
     cout << "Pasirinkite režimą:\n"
          << " f - skaityti iš failo\n"
@@ -182,10 +221,16 @@ int main() {
          << " c - konteinerių palyginimas (vector vs list)\n"
          << " s - strategijų palyginimas (3 strategijos)\n"
          << " n - naudoti konkrečią strategiją su failu\n"
+         << " x - platūs testavimo nustatymai\n"
          << " Pasirinkimas: ";
 
     char rez;
     cin >> rez;
+
+    if (rez == 'x' || rez == 'X') {
+        rodyti_placia_testavimo_meniu();
+        return 0;
+    }
 
     if (rez == 'n' || rez == 'N') {
         naudoti_strategija_su_failu();

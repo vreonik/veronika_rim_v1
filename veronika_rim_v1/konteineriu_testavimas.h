@@ -22,9 +22,12 @@ void testuoti_konteinerius_sugeneruotus();
 void testuoti_konteinerius_su_pasirinktu_failu();
 void testuoti_konteinerius_su_vidurkiais();
 
-// Naujos funkcijos strategijų testavimui
 void testuoti_visas_strategijas(const string& fname);
 void testuoti_strategijas_su_visais_dydziais();
+
+void atlikti_isamiai_analize(const string& fname, int testu_kartai = 5);
+void palyginti_strategijas_pagal_dydi();
+void atlikti_greicio_analize();
 
 template<typename Container>
 void testuoti_strategija_su_vidurkiu(const string& fname,
