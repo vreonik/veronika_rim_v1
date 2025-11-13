@@ -73,6 +73,11 @@ v1.0 (2025-11-13):
 - Pilna dokumentacija
 
 Naudojimosi InstrukcijaNaudojimosi Instrukcija:
+Tiesioginis kompiliavimas:
+cd veronika_rim_v1
+g++ -std=c++17 -O2 -o studentai *.cpp
+./studentai
+
 Programa palaiko 6 veikimo režimus: 
 Pagrindiniai Režimai: 
 f - Skaityti iš failo - apdoroti egzistuojantį failą 
