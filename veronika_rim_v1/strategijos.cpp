@@ -1,4 +1,5 @@
 #include "strategijos.h"
+#include "util.h"
 #include <algorithm>
 #include <chrono>
 #include <iterator>
@@ -34,7 +35,7 @@ TestoRezultatai strategija_1(const Container& visi_stud,
     
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
-    rez.rusiavimo_laikas = 0; // Rūšiavimas atliekamas atskirai
+    rez.rusiavimo_laikas = 0;
     return rez;
 }
 

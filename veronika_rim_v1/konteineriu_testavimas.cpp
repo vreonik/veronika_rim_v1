@@ -22,8 +22,6 @@ using std::ofstream;
 using Laikmatis = std::chrono::high_resolution_clock;
 using ms = std::chrono::milliseconds;
 
-// Pagalbinė funkcija strategijų testavimui
-template<typename Container>
 void testuoti_strategija_su_vidurkiu(const string& fname,
                                    char b,
                                    char rikiuoti_kriterijus,
@@ -36,7 +34,6 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
     long long list_skirstymo_sum = 0, list_rusiavimo_sum = 0;
     
     for (int k = 0; k < testu_kartai; k++) {
-        // Vector testavimas
         {
             auto visi = nuskaityti(fname);
             vector<Studentas> vargsiukai, kietakiai;
@@ -58,7 +55,6 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
             vector_rusiavimo_sum += rez.rusiavimo_laikas;
         }
         
-        // List testavimas
         {
             auto visi = nuskaityti_i_list(fname);
             list<Studentas> vargsiukai, kietakiai;
@@ -81,7 +77,6 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
         }
     }
     
-    // Rezultatų išvedimas
     long long vector_vidurkis = vector_skirstymo_sum / testu_kartai;
     long long list_vidurkis = list_skirstymo_sum / testu_kartai;
     
@@ -96,7 +91,6 @@ void testuoti_strategija_su_vidurkiu(const string& fname,
                << list_rusiavimo_sum/testu_kartai << "\n";
 }
 
-// Pagrindinė strategijų testavimo funkcija
 void testuoti_visas_strategijas(const string& fname) {
     char b = 'v';
     char rikiuoti_kriterijus = 'v';
@@ -113,18 +107,15 @@ void testuoti_visas_strategijas(const string& fname) {
     strategiju_rezultatai << "\nFailas: " << fname << "\n";
     strategiju_rezultatai << "Dydis, Strategija, Konteineris, Skirstymas(ms), Rūšiavimas(ms)\n";
 
-    // Testuojame visas 3 strategijas
     for (int strategija = 1; strategija <= 3; strategija++) {
         cout << "\n--- Strategija " << strategija << " ---" << endl;
-        testuoti_strategija_su_vidurkiu(fname, b, rikiuoti_kriterijus, testu_kartai,
-                                      strategiju_rezultatai, strategija);
+        testuoti_strategija_su_vidurkiu(fname, b, rikiuoti_kriterijus, testu_kartai, strategiju_rezultatai, strategija);
     }
     
     strategiju_rezultatai.close();
     cout << "\nStrategijų palyginimo rezultatai išsaugoti į 'strategiju_palyginimas.txt'\n";
 }
 
-// Atnaujinta pagrindinė testavimo funkcija
 void testuoti_konteineri_su_vidurkiu(const string& fname, char b, char rikiuoti_kriterijus, int testu_kartai, ofstream& rezultatai) {
     auto N = nuskaityti(fname).size();
     
@@ -235,7 +226,6 @@ void testuoti_konteinerius_su_vidurkiais() {
 
         testuoti_konteineri_su_vidurkiu(fname, b, rikiuoti_kriterijus, testu_kartai, rezultatai);
         
-        // Papildomai testuojame visas strategijas
         testuoti_visas_strategijas(fname);
     }
     
@@ -273,7 +263,6 @@ void testuoti_konteinerius_sugeneruotus() {
         
         testuoti_konteineri_su_vidurkiu(fname, b, rikiuoti_kriterijus, testu_kartai, palyginimo_rezultatai);
         
-        // Testuojame strategijas
         testuoti_visas_strategijas(fname);
         
         if (N >= 1000000) {
@@ -318,7 +307,6 @@ void testuoti_konteinerius_su_pasirinktu_failu() {
     testuoti_visas_strategijas(fname);
 }
 
-// Nauja funkcija - strategijų palyginimas su visais dydžiais
 void testuoti_strategijas_su_visais_dydziais() {
     vector<int> dydziai = {1000, 10000, 100000, 1000000};
     int testu_kartai = 3;
@@ -339,7 +327,6 @@ void testuoti_strategijas_su_visais_dydziais() {
         
         string fname = "strategiju_test_" + std::to_string(N) + ".txt";
         
-        // Generuojame failą jei reikia
         std::ifstream testas(fname);
         if (!testas.good()) {
             cout << "Generuojamas failas...";
@@ -348,7 +335,6 @@ void testuoti_strategijas_su_visais_dydziais() {
         }
         testas.close();
 
-        // Testuojame visas 3 strategijas
         for (int strategija = 1; strategija <= 3; strategija++) {
             cout << "Strategija " << strategija << "..." << endl;
             
@@ -358,7 +344,6 @@ void testuoti_strategijas_su_visais_dydziais() {
             long long vector_sum = 0, list_sum = 0;
             
             for (int k = 0; k < testu_kartai; k++) {
-                // Vector
                 {
                     auto visi = nuskaityti(fname);
                     vector<Studentas> vargsiukai, kietakiai;
@@ -372,7 +357,6 @@ void testuoti_strategijas_su_visais_dydziais() {
                     vector_sum += rez.skirstymo_laikas;
                 }
                 
-                // List
                 {
                     auto visi = nuskaityti_i_list(fname);
                     list<Studentas> vargsiukai, kietakiai;

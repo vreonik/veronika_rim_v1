@@ -25,3 +25,17 @@ void testuoti_konteinerius_su_vidurkiais();
 // Naujos funkcijos strategijų testavimui
 void testuoti_visas_strategijas(const string& fname);
 void testuoti_strategijas_su_visais_dydziais();
+
+template<typename Container>
+void testuoti_strategija_su_vidurkiu(const string& fname,
+                                   char b,
+                                   char rikiuoti_kriterijus,
+                                   int testu_kartai,
+                                   ofstream& rezultatai,
+                                   int strategijos_nr);
+
+extern template void testuoti_strategija_su_vidurkiu<vector<Studentas>>(
+    const string&, char, char, int, ofstream&, int);
+extern template void testuoti_strategija_su_vidurkiu<list<Studentas>>(
+    const string&, char, char, int, ofstream&, int);
+Dabar pataisykime konteineriu_testavimas.cpp:

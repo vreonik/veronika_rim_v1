@@ -13,6 +13,7 @@
 #include "konteineriu_testavimas.h"
 #include "apdorojimas.h"
 #include "util.h"
+#include "strategijos.h"
 
 using std::cout;
 using std::cin;
@@ -25,6 +26,30 @@ using ms = std::chrono::milliseconds;
 
 void testuoti_programa();
 
+void testuoti_strategijas() {
+    cout << "STRATEGIJŲ TESTAVIMAS\n";
+    cout << "Pasirinkite testavimo būdą:\n"
+         << " s - sugeneruoti naujus failus\n"
+         << " e - naudoti esamą failą\n"
+         << " Pasirinkimas: ";
+    
+    char pasirinkimas;
+    cin >> pasirinkimas;
+    
+    if (pasirinkimas == 'e' || pasirinkimas == 'E') {
+        cout << "Įveskite failo pavadinimą: ";
+        string fname;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        getline(cin, fname);
+        
+        if (fname.empty()) fname = "kursiokai.txt";
+        
+        testuoti_visas_strategijas(fname);
+    } else {
+        testuoti_strategijas_su_visais_dydziais();
+    }
+}
+
 int main() {
     cout << "Pasirinkite režimą:\n"
          << " f - skaityti iš failo\n"
@@ -32,10 +57,17 @@ int main() {
          << " p - įvesti/generuoti patiems\n"
          << " t - testuoti (5 dydžiai, 5 kartai)\n"
          << " c - konteinerių palyginimas (vector vs list)\n"
+         << " s - strategijų palyginimas (3 strategijos)\n"
          << " Pasirinkimas: ";
 
     char rez;
     cin >> rez;
+
+    if (rez == 's' || rez == 'S') {
+        testavimo_rezimas = true;
+        testuoti_strategijas();
+        return 0;
+    }
 
     if (rez == 'c' || rez == 'C') {
         testavimo_rezimas = true;

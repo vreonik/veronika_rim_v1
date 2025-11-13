@@ -12,6 +12,7 @@ enum class Strategija {
 struct TestoRezultatai {
     long long skirstymo_laikas;
     long long rusiavimo_laikas;
+    long long irasymo_laikas;
     size_t atmintis_vargsiukai;
     size_t atmintis_kietakiai;
 };
