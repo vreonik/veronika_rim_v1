@@ -1,0 +1,45 @@
+
+Failas: palyginimo_test_1000.txt
+Dydis, Strategija, Konteineris, Laikas(ms), Atmintis(baitai)
+1000,strategija_1,vector,0,124048
+1000,strategija_1,list,0,140048
+1000,strategija_2,vector,0,124048
+1000,strategija_2,list,0,140048
+1000,strategija_3,vector,0,124048
+1000,strategija_3,list,0,140048
+
+Failas: palyginimo_test_10000.txt
+Dydis, Strategija, Konteineris, Laikas(ms), Atmintis(baitai)
+10000,strategija_1,vector,8,1240048
+10000,strategija_1,list,7,1400048
+10000,strategija_2,vector,7,1240048
+10000,strategija_2,list,5,1400048
+10000,strategija_3,vector,7,1240048
+10000,strategija_3,list,5,1400048
+
+Failas: palyginimo_test_100000.txt
+Dydis, Strategija, Konteineris, Laikas(ms), Atmintis(baitai)
+100000,strategija_1,vector,82,12400048
+100000,strategija_1,list,80,14000048
+100000,strategija_2,vector,72,12400048
+100000,strategija_2,list,60,14000048
+100000,strategija_3,vector,72,12400048
+100000,strategija_3,list,58,14000048
+
+Failas: palyginimo_test_1000000.txt
+Dydis, Strategija, Konteineris, Laikas(ms), Atmintis(baitai)
+1000000,strategija_1,vector,860,124000048
+1000000,strategija_1,list,815,140000048
+1000000,strategija_2,vector,725,124000048
+1000000,strategija_2,list,596,140000048
+1000000,strategija_3,vector,732,124000048
+1000000,strategija_3,list,590,140000048
+
+Failas: palyginimo_test_10000000.txt
+Dydis, Strategija, Konteineris, Laikas(ms), Atmintis(baitai)
+10000000,strategija_1,vector,9012,1240000048
+10000000,strategija_1,list,8568,1400000048
+10000000,strategija_2,vector,7527,1240000048
+10000000,strategija_2,list,5889,1400000048
+10000000,strategija_3,vector,7526,1240000048
+10000000,strategija_3,list,6153,1400000048

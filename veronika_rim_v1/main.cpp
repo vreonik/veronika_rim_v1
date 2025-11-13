@@ -303,7 +303,7 @@ void naudoti_strategija_su_failu() {
 }
 
 void testuoti_programa() {
-    vector<int> dydziai = {1000, 10000, 100000};
+    vector<int> dydziai = {1000, 10000, 100000, 1000000, 10000000};
     int nd_kiek = 5;
 
     cout << "Testavimas su " << dydziai.size() << " dydžiais:\n";

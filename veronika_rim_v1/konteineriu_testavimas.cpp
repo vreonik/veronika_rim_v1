@@ -140,7 +140,7 @@ void testuoti_konteinerius_su_failu(const string& fname) {
 }
 
 void testuoti_konteinerius_sugeneruotus() {
-    vector<int> dydziai = {1000, 10000, 100000};
+    vector<int> dydziai = {1000, 10000, 100000, 1000000, 10000000};
     int nd_kiek = 5;
     
     cout << "Konteinerių palyginimo testas su " << dydziai.size() << " dydžiais:\n";
