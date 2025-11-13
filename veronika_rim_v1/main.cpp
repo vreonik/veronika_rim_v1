@@ -50,6 +50,129 @@ void testuoti_strategijas() {
     }
 }
 
+void naudoti_strategija_su_failu() {
+    cout << "STRATEGIJOS NAUDOJIMAS SU FAILU\n";
+    cout << "Įveskite failo pavadinimą: ";
+    string fname;
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    getline(cin, fname);
+    
+    if (fname.empty()) fname = "kursiokai.txt";
+
+    std::ifstream testas(fname);
+    if (!testas.good()) {
+        cout << "Klaida: Failas '" << fname << "' neegzistuoja!\n";
+        return;
+    }
+    testas.close();
+
+    cout << "Pasirinkite strategiją:\n"
+         << " 1 - Dvi naujos grupės (vargsiukai ir kietakiai)\n"
+         << " 2 - Viena nauja grupė + trynimas\n"
+         << " 3 - STL algoritmai\n"
+         << " 4 - std::partition (greičiausia)\n"
+         << " Pasirinkimas: ";
+    int strategija;
+    cin >> strategija;
+
+    cout << "Pasirinkite konteinerio tipą:\n"
+         << " v - std::vector\n"
+         << " l - std::list\n"
+         << " Pasirinkimas: ";
+    char konteinerio_tipas;
+    cin >> konteinerio_tipas;
+
+    cout << "Pasirinkite galutinio pažymio skaičiavimo būdą:\n"
+         << " v - vidurkis\n"
+         << " m - mediana\n"
+         << " a - abu\n"
+         << " Pasirinkimas: ";
+    char budas;
+    cin >> budas;
+
+    cout << "Rikiuoti pagal:\n"
+         << " v - vidurkį\n"
+         << " m - medianą\n"
+         << " p - vardą\n"
+         << " Pasirinkimas: ";
+    char rikiuoti_kriterijus;
+    cin >> rikiuoti_kriterijus;
+
+    auto start = Laikmatis::now();
+    
+    if (konteinerio_tipas == 'v' || konteinerio_tipas == 'V') {
+        auto visi = nuskaityti(fname);
+        vector<Studentas> vargsiukai, kietakiai;
+        
+        TestoRezultatai rez;
+        switch(strategija) {
+            case 1:
+                rez = strategija_1(visi, vargsiukai, kietakiai, budas);
+                break;
+            case 2:
+                rez = strategija_2(visi, vargsiukai, budas);
+                kietakiai = std::move(visi);
+                break;
+            case 3:
+                rez = strategija_3(visi, vargsiukai, budas);
+                kietakiai = std::move(visi);
+                break;
+            case 4:
+                rez = strategija_3_partition(visi, vargsiukai, budas);
+                kietakiai = std::move(visi);
+                break;
+            default:
+                cout << "Neteisingas strategijos pasirinkimas!\n";
+                return;
+        }
+        
+        cout << "Skirstymas užtruko: " << rez.skirstymo_laikas << "ms\n";
+        cout << "Vargsiukų: " << vargsiukai.size() << "\n";
+        cout << "Kietakių: " << kietakiai.size() << "\n";
+        
+        long long rusiavimo_ms = 0, irasymo_ms = 0;
+        klasifikuoti_ir_irasyti(vargsiukai, budas,
+                               "vargsiukai_strategija_" + std::to_string(strategija) + ".txt",
+                               "kietakiai_strategija_" + std::to_string(strategija) + ".txt",
+                               rusiavimo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+        
+    } else {
+        auto visi = nuskaityti_i_list(fname);
+        list<Studentas> vargsiukai, kietakiai;
+        
+        TestoRezultatai rez;
+        switch(strategija) {
+            case 1:
+                rez = strategija_1(visi, vargsiukai, kietakiai, budas);
+                break;
+            case 2:
+                rez = strategija_2(visi, vargsiukai, budas);
+                kietakiai = std::move(visi);
+                break;
+            case 3:
+                rez = strategija_3(visi, vargsiukai, budas);
+                kietakiai = std::move(visi);
+                break;
+            default:
+                cout << "Ši strategija nepalaikoma su list konteineriu!\n";
+                return;
+        }
+        
+        cout << "Skirstymas užtruko: " << rez.skirstymo_laikas << "ms\n";
+        cout << "Vargsiukų: " << vargsiukai.size() << "\n";
+        cout << "Kietakių: " << kietakiai.size() << "\n";
+        
+        long long rusiavimo_ms = 0, irasymo_ms = 0;
+        klasifikuoti_ir_irasyti(vargsiukai, budas,
+                               "vargsiukai_strategija_" + std::to_string(strategija) + ".txt",
+                               "kietakiai_strategija_" + std::to_string(strategija) + ".txt",
+                               rusiavimo_ms, rusiavimo_ms, irasymo_ms, rikiuoti_kriterijus);
+    }
+    
+    auto end = Laikmatis::now();
+    cout << "Visas apdorojimas užtruko: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
+}
+
 int main() {
     cout << "Pasirinkite režimą:\n"
          << " f - skaityti iš failo\n"
@@ -58,10 +181,16 @@ int main() {
          << " t - testuoti (5 dydžiai, 5 kartai)\n"
          << " c - konteinerių palyginimas (vector vs list)\n"
          << " s - strategijų palyginimas (3 strategijos)\n"
+         << " n - naudoti konkrečią strategiją su failu\n"
          << " Pasirinkimas: ";
 
     char rez;
     cin >> rez;
+
+    if (rez == 'n' || rez == 'N') {
+        naudoti_strategija_su_failu();
+        return 0;
+    }
 
     if (rez == 's' || rez == 'S') {
         testavimo_rezimas = true;

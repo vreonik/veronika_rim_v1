@@ -20,8 +20,10 @@ TestoRezultatai strategija_1(const Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
-    vargsiukai.reserve(visi_stud.size() / 2);
-    kietakiai.reserve(visi_stud.size() / 2);
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
+        vargsiukai.reserve(visi_stud.size() / 2);
+        kietakiai.reserve(visi_stud.size() / 2);
+    }
     
     for (const auto &s : visi_stud) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
@@ -46,7 +48,9 @@ TestoRezultatai strategija_2(Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
-    vargsiukai.reserve(visi_stud.size() / 2);
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
+        vargsiukai.reserve(visi_stud.size() / 2);
+    }
     
     auto it = visi_stud.begin();
     while (it != visi_stud.end()) {
@@ -101,7 +105,9 @@ TestoRezultatai strategija_3(Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
-    vargsiukai.reserve(visi_stud.size() / 2);
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
+        vargsiukai.reserve(visi_stud.size() / 2);
+    }
     
     auto is_vargsiukas = [pasirinkimas](const Studentas& s) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
@@ -136,14 +142,16 @@ TestoRezultatai strategija_3(std::list<Studentas>& visi_stud,
         return galutinis < 5.0;
     };
     
-    visi_stud.remove_if([&](const Studentas& s) {
-        if (is_vargsiukas(s)) {
-            vargsiukai.splice(vargsiukai.end(), visi_stud,
-                             std::find(visi_stud.begin(), visi_stud.end(), s));
-            return true;
+    auto it = visi_stud.begin();
+    while (it != visi_stud.end()) {
+        if (is_vargsiukas(*it)) {
+            auto next_it = std::next(it);
+            vargsiukai.splice(vargsiukai.end(), visi_stud, it);
+            it = next_it;
+        } else {
+            ++it;
         }
-        return false;
-    });
+    }
     
     auto end = high_resolution_clock::now();
     
@@ -159,7 +167,9 @@ TestoRezultatai strategija_3_partition(Container& visi_stud,
                                       char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
-    vargsiukai.reserve(visi_stud.size() / 2);
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
+        vargsiukai.reserve(visi_stud.size() / 2);
+    }
     
     auto is_kietakas = [pasirinkimas](const Studentas& s) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
