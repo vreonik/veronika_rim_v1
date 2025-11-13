@@ -21,3 +21,7 @@ void testuoti_konteinerius_su_failu(const string& fname);
 void testuoti_konteinerius_sugeneruotus();
 void testuoti_konteinerius_su_pasirinktu_failu();
 void testuoti_konteinerius_su_vidurkiais();
+
+// Naujos funkcijos strategijų testavimui
+void testuoti_visas_strategijas(const string& fname);
+void testuoti_strategijas_su_visais_dydziais();
