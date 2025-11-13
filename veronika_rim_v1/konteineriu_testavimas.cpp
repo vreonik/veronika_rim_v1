@@ -314,7 +314,7 @@ void testuoti_strategijas_su_visais_dydziais() {
     char b = 'v';
     char rikiuoti_kriterijus = 'v';
     
-    cout << "STRATEGIJŲ PALYGINIMAS SU VISIAIS DYDŽIAIS\n";
+    cout << "STRATEGIJŲ PALYGINIMAS SU VISAIS DYDŽIAIS\n";
     cout << "Testuojami dydžiai: ";
     for (int dydis : dydziai) cout << dydis << " ";
     cout << "\n";

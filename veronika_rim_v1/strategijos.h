@@ -35,3 +35,9 @@ template<typename Container>
 TestoRezultatai strategija_3(Container& visi_stud,
                             Container& vargsiukai,
                             char pasirinkimas);
+
+// 3 strategijos variantas - std::partition (efektyvesnis vektoriui)
+template<typename Container>
+TestoRezultatai strategija_3_partition(Container& visi_stud,
+                                      Container& vargsiukai,
+                                      char pasirinkimas);

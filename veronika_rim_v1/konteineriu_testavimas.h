@@ -38,4 +38,3 @@ extern template void testuoti_strategija_su_vidurkiu<vector<Studentas>>(
     const string&, char, char, int, ofstream&, int);
 extern template void testuoti_strategija_su_vidurkiu<list<Studentas>>(
     const string&, char, char, int, ofstream&, int);
-Dabar pataisykime konteineriu_testavimas.cpp:
