@@ -3,6 +3,7 @@
 #include "util.h"
 #include <algorithm>
 #include <iterator>
+#include <iomanip>
 
 bool testavimo_rezimas = false;
 
@@ -10,44 +11,44 @@ template<typename Container>
 void spausdinti_perziura(const Container& visi_stud, char pasirinkimas, int limitas) {
     if (testavimo_rezimas) return;
 
-    cout << "\nPirmi " << limitas << " studentų (peržiūra):\n";
-    cout << left << setw(15) << "Vardas"
-         << left << setw(15) << "Pavarde";
+    std::cout << "\nPirmi " << limitas << " studentų (peržiūra):\n";
+    std::cout << std::left << std::setw(15) << "Vardas"
+              << std::left << std::setw(15) << "Pavarde";
     if (pasirinkimas == 'v' || pasirinkimas == 'V')
-        cout << left << setw(20) << "Galutinis(Vid.)";
+        std::cout << std::left << std::setw(20) << "Galutinis(Vid.)";
     else if (pasirinkimas == 'm' || pasirinkimas == 'M')
-        cout << left << setw(20) << "Galutinis(Med.)";
+        std::cout << std::left << std::setw(20) << "Galutinis(Med.)";
     else
-        cout << left << setw(20) << "Galutinis(Vid.)"
-             << left << setw(20) << "Galutinis(Med.)";
+        std::cout << std::left << std::setw(20) << "Galutinis(Vid.)"
+                  << std::left << std::setw(20) << "Galutinis(Med.)";
 
-    cout << "\n" << string(70, '-') << "\n";
+    std::cout << "\n" << std::string(70, '-') << "\n";
     int kiek = 0;
     for (const auto &s : visi_stud) {
         if (kiek++ >= limitas) break;
         auto [gvid, gmed] = skaiciuoti_galutinius(s);
-        cout << left << setw(15) << s.vard
-             << left << setw(15) << s.pav;
+        std::cout << std::left << std::setw(15) << s.vard
+                  << std::left << std::setw(15) << s.pav;
         if (pasirinkimas == 'v' || pasirinkimas == 'V')
-            cout << left << setw(20) << gvid;
+            std::cout << std::left << std::setw(20) << std::fixed << std::setprecision(2) << gvid;
         else if (pasirinkimas == 'm' || pasirinkimas == 'M')
-            cout << left << setw(20) << gmed;
+            std::cout << std::left << std::setw(20) << std::fixed << std::setprecision(2) << gmed;
         else
-            cout << left << setw(20) << gvid
-                 << left << setw(20) << gmed;
-        cout << "\n";
+            std::cout << std::left << std::setw(20) << std::fixed << std::setprecision(2) << gvid
+                      << std::left << std::setw(20) << std::fixed << std::setprecision(2) << gmed;
+        std::cout << "\n";
     }
     
     auto distance = std::distance(visi_stud.begin(), visi_stud.end());
     if (static_cast<size_t>(distance) > static_cast<size_t>(limitas))
-        cout << "... ir dar " << (distance - limitas) << " įrašų.\n";
+        std::cout << "... ir dar " << (distance - limitas) << " įrašų.\n";
 }
 
 template<typename Container>
 void klasifikuoti_ir_irasyti(const Container &visi_stud,
                              char pasirinkimas,
-                             const string &failas_vargsiukai,
-                             const string &failas_kietakiai,
+                             const std::string &failas_vargsiukai,
+                             const std::string &failas_kietakiai,
                              long long &skirstymo_ms,
                              long long &rusiavimo_ms,
                              long long &irasymo_ms,
@@ -55,24 +56,20 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
     using namespace std::chrono;
     auto pradzia = high_resolution_clock::now();
 
-    vector<pair<Studentas, pair<double,double>>> vargsiukai, kietakiai;
+    // Sukuriame laikinus konteinerius
+    std::vector<Studentas> vargsiukai, kietakiai;
 
-    auto container_size = std::distance(visi_stud.begin(), visi_stud.end());
-    if (container_size > 100000) {
-        vargsiukai.reserve(container_size / 2);
-        kietakiai.reserve(container_size / 2);
-    }
-
+    // Skirstome studentus
     for (const auto &s : visi_stud) {
         auto [galut_vid, galut_med] = skaiciuoti_galutinius(s);
         double galutinis = (pasirinkimas == 'v' || pasirinkimas == 'V') ? galut_vid :
-                           (pasirinkimas == 'm' || pasirinkimas == 'M') ? galut_med :
-                           (galut_vid + galut_med) / 2.0;
+                          (pasirinkimas == 'm' || pasirinkimas == 'M') ? galut_med :
+                          (galut_vid + galut_med) / 2.0;
 
         if (galutinis < 5.0)
-            vargsiukai.push_back({s, {galut_vid, galut_med}});
+            vargsiukai.push_back(s);
         else
-            kietakiai.push_back({s, {galut_vid, galut_med}});
+            kietakiai.push_back(s);
     }
 
     auto skirstymo_pabaiga = high_resolution_clock::now();
@@ -80,61 +77,67 @@ void klasifikuoti_ir_irasyti(const Container &visi_stud,
 
     auto rusiavimo_pradzia = high_resolution_clock::now();
 
-    auto rikiuoti = [rikiuoti_kriterijus](const pair<Studentas, pair<double,double>> &a,
-                                           const pair<Studentas, pair<double,double>> &b) {
+    // Rikiuojame pagal pasirinktą kriterijų
+    auto rikiuoti = [rikiuoti_kriterijus](const Studentas &a, const Studentas &b) {
+        auto [a_vid, a_med] = skaiciuoti_galutinius(a);
+        auto [b_vid, b_med] = skaiciuoti_galutinius(b);
+        
         if (rikiuoti_kriterijus == 'v' || rikiuoti_kriterijus == 'V')
-            return a.second.first < b.second.first;
+            return a_vid < b_vid;
         else if (rikiuoti_kriterijus == 'm' || rikiuoti_kriterijus == 'M')
-            return a.second.second < b.second.second;
+            return a_med < b_med;
         else
-            return a.first.vard < b.first.vard;
+            return a.vard < b.vard;
     };
 
-    sort(vargsiukai.begin(), vargsiukai.end(), rikiuoti);
-    sort(kietakiai.begin(), kietakiai.end(), rikiuoti);
+    std::sort(vargsiukai.begin(), vargsiukai.end(), rikiuoti);
+    std::sort(kietakiai.begin(), kietakiai.end(), rikiuoti);
 
     auto rusiavimo_pabaiga = high_resolution_clock::now();
     rusiavimo_ms = duration_cast<milliseconds>(rusiavimo_pabaiga - rusiavimo_pradzia).count();
 
     auto ras_pradzia = high_resolution_clock::now();
     
-    ofstream fv(failas_vargsiukai);
-    ofstream fk(failas_kietakiai);
-    fv << fixed << setprecision(2);
-    fk << fixed << setprecision(2);
+    // Įrašome į failus
+    std::ofstream fv(failas_vargsiukai);
+    std::ofstream fk(failas_kietakiai);
+    fv << std::fixed << std::setprecision(2);
+    fk << std::fixed << std::setprecision(2);
 
-    for (auto &p : vargsiukai) {
-        if (pasirinkimas == 'v' || pasirinkimas == 'V')
-            fv << p.first.vard << " " << p.first.pav << " " << p.second.first << "\n";
-        else if (pasirinkimas == 'm' || pasirinkimas == 'M')
-            fv << p.first.vard << " " << p.first.pav << " " << p.second.second << "\n";
-        else
-            fv << p.first.vard << " " << p.first.pav << " "
-               << p.second.first << " " << p.second.second << "\n";
+    // Header'iai
+    fv << "Vardas Pavarde Galutinis\n";
+    fk << "Vardas Pavarde Galutinis\n";
+
+    for (const auto &s : vargsiukai) {
+        auto [galut_vid, galut_med] = skaiciuoti_galutinius(s);
+        double galutinis = (pasirinkimas == 'v' || pasirinkimas == 'V') ? galut_vid :
+                          (pasirinkimas == 'm' || pasirinkimas == 'M') ? galut_med :
+                          (galut_vid + galut_med) / 2.0;
+        fv << s.vard << " " << s.pav << " " << galutinis << "\n";
     }
 
-    for (auto &p : kietakiai) {
-        if (pasirinkimas == 'v' || pasirinkimas == 'V')
-            fk << p.first.vard << " " << p.first.pav << " " << p.second.first << "\n";
-        else if (pasirinkimas == 'm' || pasirinkimas == 'M')
-            fk << p.first.vard << " " << p.first.pav << " " << p.second.second << "\n";
-        else
-            fk << p.first.vard << " " << p.first.pav << " "
-               << p.second.first << " " << p.second.second << "\n";
+    for (const auto &s : kietakiai) {
+        auto [galut_vid, galut_med] = skaiciuoti_galutinius(s);
+        double galutinis = (pasirinkimas == 'v' || pasirinkimas == 'V') ? galut_vid :
+                          (pasirinkimas == 'm' || pasirinkimas == 'M') ? galut_med :
+                          (galut_vid + galut_med) / 2.0;
+        fk << s.vard << " " << s.pav << " " << galutinis << "\n";
     }
 
     auto ras_pabaiga = high_resolution_clock::now();
     irasymo_ms = duration_cast<milliseconds>(ras_pabaiga - ras_pradzia).count();
 
-    spausdinti_perziura(visi_stud, pasirinkimas);
+    if (!testavimo_rezimas) {
+        spausdinti_perziura(visi_stud, pasirinkimas);
+    }
 }
 
 template<typename Container>
-void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
+void apdoroti_faila(const std::string &fname, char budas, char rikiavimas) {
     auto rs = Laikmatis::now();
     Container visi;
     
-    if constexpr (std::is_same_v<Container, vector<Studentas>>) {
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
         visi = nuskaityti(fname);
     } else {
         visi = nuskaityti_i_list(fname);
@@ -143,23 +146,26 @@ void apdoroti_faila(const string &fname, char budas, char rikiavimas) {
     auto re = Laikmatis::now();
     long long read_ms = std::chrono::duration_cast<ms>(re - rs).count();
 
-    string bazinis = be_priesdelio(fname);
+    std::string bazinis = be_priesdelio(fname);
     long long skirstymo_ms = 0, rusiavimo_ms = 0, irasymo_ms = 0;
-    klasifikuoti_ir_irasyti(visi, budas, "vargsiukai_" + bazinis + ".txt",
-                             "kietakiai_" + bazinis + ".txt",
-                             skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiavimas);
+    
+    klasifikuoti_ir_irasyti(visi, budas,
+                           "vargsiukai_" + bazinis + ".txt",
+                           "kietakiai_" + bazinis + ".txt",
+                           skirstymo_ms, rusiavimo_ms, irasymo_ms, rikiavimas);
 
-    cout << "Failas: " << fname
-         << "\n  Skaitymas: " << read_ms << "ms"
-         << "\n  Skirstymas: " << skirstymo_ms << "ms"
-         << "\n  Rūšiavimas: " << rusiavimo_ms << "ms"
-         << "\n  Įrašymas: " << irasymo_ms << "ms"
-         << "\n  Viso: " << (read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms) << "ms\n";
+    std::cout << "Failas: " << fname
+              << "\n  Skaitymas: " << read_ms << "ms"
+              << "\n  Skirstymas: " << skirstymo_ms << "ms"
+              << "\n  Rūšiavimas: " << rusiavimo_ms << "ms"
+              << "\n  Įrašymas: " << irasymo_ms << "ms"
+              << "\n  Viso: " << (read_ms + skirstymo_ms + rusiavimo_ms + irasymo_ms) << "ms\n";
 }
 
-template void spausdinti_perziura<vector<Studentas>>(const vector<Studentas>&, char, int);
-template void spausdinti_perziura<list<Studentas>>(const list<Studentas>&, char, int);
-template void klasifikuoti_ir_irasyti<vector<Studentas>>(const vector<Studentas>&, char, const string&, const string&, long long&, long long&, long long&, char);
-template void klasifikuoti_ir_irasyti<list<Studentas>>(const list<Studentas>&, char, const string&, const string&, long long&, long long&, long long&, char);
-template void apdoroti_faila<vector<Studentas>>(const string&, char, char);
-template void apdoroti_faila<list<Studentas>>(const string&, char, char);
+// Eksplicitios specializacijos
+template void spausdinti_perziura<std::vector<Studentas>>(const std::vector<Studentas>&, char, int);
+template void spausdinti_perziura<std::list<Studentas>>(const std::list<Studentas>&, char, int);
+template void klasifikuoti_ir_irasyti<std::vector<Studentas>>(const std::vector<Studentas>&, char, const std::string&, const std::string&, long long&, long long&, long long&, char);
+template void klasifikuoti_ir_irasyti<std::list<Studentas>>(const std::list<Studentas>&, char, const std::string&, const std::string&, long long&, long long&, long long&, char);
+template void apdoroti_faila<std::vector<Studentas>>(const std::string&, char, char);
+template void apdoroti_faila<std::list<Studentas>>(const std::string&, char, char);
