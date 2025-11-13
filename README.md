@@ -75,8 +75,10 @@ v1.0 (2025-11-13):
 - CMake build sistema 
 - Pilna dokumentacija
 
-Naudojimosi InstrukcijaNaudojimosi Instrukcija:
+Naudojimosi Instrukcija:
+
 Tiesioginis kompiliavimas:
+
 cd veronika_rim_v1
 g++ -std=c++17 -O2 -o studentai *.cpp
 ./studentai
