@@ -1,7 +1,7 @@
 Studentų Rūšiavimo Sistema v1.0
 
 Release Istorija:
-v0.1 (2025-09-25) - pradiinė versija:
+v0.1 (2025-09-25) - pradinė versija:
 
 Galimybė įvesti nežinomą namų darbų kiekį (vartotojas pats nusprendžia, kada baigti įvestį).
 Galimybė generuoti atsitiktinius pažymius tiek namų darbams, tiek egzaminui.
@@ -10,6 +10,7 @@ Visas kodas realizuotas viename .cpp faile.
 Programa paruošta tolesniam plėtojimui ir sinchronizuota su GitHub sistema.
 
 v0.2 (2025-10-03):
+
 Sukurta atsitiktinių studentų sąrašų generavimo galimybė.
 Sugeneruoti penki duomenų failai, turintys po 1 000, 10 000, 100 000, 1 000 000 ir 10 000 000 įrašų.
 Įdiegta studentų skirstymo funkcija:
@@ -20,6 +21,7 @@ Pridėtas programos veikimo spartos matavimas.
 Atliktas kodo reorganizavimas.
 
 v0.3 (2025-10-30):
+
 Šioje versijoje atliktas konteinerių veikimo spartos tyrimas.
 
 Konteinerių (Vector vs List) testavimo rezultatai
@@ -65,6 +67,7 @@ Testavimo Metodologija
 - Kiekvienas studentas turi 5 namu darbu pazymius + egzamina
 
 v1.0 (2025-11-13):
+
 - Visos 3 strategijos implementuotos (Vector ir List) 
 - Išsamus konteinerių palyginimas (Vector vs List) 
 - Atminties naudojimo matavimai ir analizė 
