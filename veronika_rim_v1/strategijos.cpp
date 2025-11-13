@@ -14,6 +14,15 @@ double skaiciuoti_galutini_pazymi(const Studentas& s, char pasirinkimas) {
 }
 
 template<typename Container>
+size_t apskaiciuoti_atminti(const Container& container) {
+    if constexpr (std::is_same_v<Container, std::vector<Studentas>>) {
+        return container.capacity() * sizeof(Studentas);
+    } else {
+        return container.size() * sizeof(Studentas);
+    }
+}
+
+template<typename Container>
 TestoRezultatai strategija_1(const Container& visi_stud,
                             Container& vargsiukai,
                             Container& kietakiai,
@@ -39,6 +48,9 @@ TestoRezultatai strategija_1(const Container& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(kietakiai);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 
@@ -69,6 +81,9 @@ TestoRezultatai strategija_2(Container& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(visi_stud);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 
@@ -96,6 +111,9 @@ TestoRezultatai strategija_2(std::list<Studentas>& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(visi_stud);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 
@@ -128,6 +146,9 @@ TestoRezultatai strategija_3(Container& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(visi_stud);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 
@@ -158,6 +179,9 @@ TestoRezultatai strategija_3(std::list<Studentas>& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(visi_stud);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 
@@ -189,6 +213,9 @@ TestoRezultatai strategija_3_partition(Container& visi_stud,
     TestoRezultatai rez;
     rez.skirstymo_laikas = duration_cast<milliseconds>(end - start).count();
     rez.rusiavimo_laikas = 0;
+    rez.atmintis_vargsiukai = apskaiciuoti_atminti(vargsiukai);
+    rez.atmintis_kietakiai = apskaiciuoti_atminti(visi_stud);
+    rez.atmintis_bendra = rez.atmintis_vargsiukai + rez.atmintis_kietakiai;
     return rez;
 }
 

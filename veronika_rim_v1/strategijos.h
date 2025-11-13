@@ -15,6 +15,7 @@ struct TestoRezultatai {
     long long irasymo_laikas;
     size_t atmintis_vargsiukai;
     size_t atmintis_kietakiai;
+    size_t atmintis_bendra;
 };
 
 template<typename Container>
