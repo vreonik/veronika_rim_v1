@@ -20,6 +20,9 @@ TestoRezultatai strategija_1(const Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
+    vargsiukai.reserve(visi_stud.size() / 2);
+    kietakiai.reserve(visi_stud.size() / 2);
+    
     for (const auto &s : visi_stud) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
         
@@ -43,12 +46,14 @@ TestoRezultatai strategija_2(Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
+    vargsiukai.reserve(visi_stud.size() / 2);
+    
     auto it = visi_stud.begin();
     while (it != visi_stud.end()) {
         double galutinis = skaiciuoti_galutini_pazymi(*it, pasirinkimas);
         
         if (galutinis < 5.0) {
-            vargsiukai.push_back(*it);
+            vargsiukai.push_back(std::move(*it));
             it = visi_stud.erase(it);
         } else {
             ++it;
@@ -96,6 +101,8 @@ TestoRezultatai strategija_3(Container& visi_stud,
                             char pasirinkimas) {
     auto start = high_resolution_clock::now();
     
+    vargsiukai.reserve(visi_stud.size() / 2);
+    
     auto is_vargsiukas = [pasirinkimas](const Studentas& s) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
         return galutinis < 5.0;
@@ -131,7 +138,8 @@ TestoRezultatai strategija_3(std::list<Studentas>& visi_stud,
     
     visi_stud.remove_if([&](const Studentas& s) {
         if (is_vargsiukas(s)) {
-            vargsiukai.push_back(s);
+            vargsiukai.splice(vargsiukai.end(), visi_stud,
+                             std::find(visi_stud.begin(), visi_stud.end(), s));
             return true;
         }
         return false;
@@ -150,6 +158,8 @@ TestoRezultatai strategija_3_partition(Container& visi_stud,
                                       Container& vargsiukai,
                                       char pasirinkimas) {
     auto start = high_resolution_clock::now();
+    
+    vargsiukai.reserve(visi_stud.size() / 2);
     
     auto is_kietakas = [pasirinkimas](const Studentas& s) {
         double galutinis = skaiciuoti_galutini_pazymi(s, pasirinkimas);
